@@ -1,66 +1,75 @@
-import "../App.css";
-import { FaReact } from "react-icons/fa6";
-import { LuChevronFirst } from "react-icons/lu";
-import {IoMdToday} from "react-icons/io"
-import {MdMoreVert} from "react-icons/md"
-import {LuChevronLast} from "react-icons/lu"
-import {createContext, useState} from "react";
+import { MdMoreVert } from "react-icons/md";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { createContext, useContext, useState, type ReactNode } from "react";
 
-const SideBarContext= createContext();
-export default function Sidebar({children}) {
+type SidebarContextType = { expanded: boolean };
+const SidebarContext = createContext<SidebarContextType | null>(null);
 
-    const [expanded , setExpanded] = useState<boolean>(true);
+export default function Sidebar({ children }: { children: ReactNode }) {
+    const [expanded, setExpanded] = useState(true);
 
     return (
-        <aside className="h-screen">
-            <nav className="h-full flex flex-col bg-white border-r shadow-sm">
+        // Changed h-1 to h-screen and added dynamic width w-64 / w-20
+        <aside className="w-[240px] h-screen bg-white border-r">
+            {/* HEADER */}
+            <div className="h-16 flex items-center justify-between px-4 border-b">
+                {/* Hide text when collapsed */}
+                {expanded && <h1 className="text-lg font-semibold text-gray-800">My Dashboard</h1>}
 
-                <div className="p-4 pb-2 flex justify-between items-center">
-                    <FaReact className={`text-2xl text-blue-500 overflow-hidden transition-all ${
-                        expanded ? "w-32": "w-0"
-                    }`}></FaReact>
-                    <button className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100" onClick={()=> setExpanded((curr: boolean)=> !curr)}>
-                        {expanded ? <LuChevronFirst/> : <LuChevronLast/>}
-                    </button>
+                <button
+                    onClick={() => setExpanded((v) => !v)}
+                    className={`p-2 rounded-md hover:bg-gray-100 transition ${!expanded && "mx-auto"}`}
+                >
+                    {expanded ? <FaChevronLeft size={14} /> : <FaChevronRight size={14} />}
+                </button>
+            </div>
+
+            {/* NAV */}
+            <SidebarContext.Provider value={{ expanded }}>
+                <nav className="flex-1 px-3 py-4 space-y-1">
+                    {children}
+                </nav>
+            </SidebarContext.Provider>
+
+            {/* FOOTER */}
+            <div className="border-t p-4 flex items-center gap-3">
+                <div className="w-10 h-10 min-w-[40px] rounded-full bg-indigo-500 text-white flex items-center justify-center font-semibold">
+                    JD
                 </div>
 
-                <SideBarContext.Provider value={expanded}>
-                    <ul className={"flex-1 px-3"}>{children}</ul>
-                </SideBarContext.Provider>
-                <ul className={"flex-1 px-3"}>{children}</ul>
-                <div className={"border-t flex p-3"}>
-                    <IoMdToday className="w-10 h-10 rounded-md" />
-                    <div className={
-                        `flex justify-between items-center 
-                        overflow-hidden transition-all ${expanded ? "w-52 ml-3": "w-0"}`} >
-                        <div className={"leading-4"}>
-                            {/*TODO: Do the Backend so that does names will be replaced by actual real ones*/}
-                            <h4 className={"font-semibold"}>John Doe</h4>
-                            <span className={"text-xs text-gray-600"}>johndoe@gmail.com</span>
+                {expanded && (
+                    <div className="flex-1 flex items-center justify-between overflow-hidden">
+                        <div className="leading-4">
+                            <p className="text-sm font-medium truncate">John Doe</p>
+                            <p className="text-xs text-gray-500 truncate">Product Manager</p>
                         </div>
-                        <MdMoreVert size={20}></MdMoreVert>
+                        <MdMoreVert />
                     </div>
-                </div>
-            </nav>
+                )}
+            </div>
         </aside>
     );
 }
 
-export function SidebarItem({icon, text, active, alert}){
-    const [expanded, setExpanded] =
+export function SidebarItem({ icon, text, active, alert }: { icon: ReactNode; text: string; active?: boolean; alert?: boolean; }) {
+    const context = useContext(SidebarContext);
+    if (!context) return null;
+    const { expanded } = context;
+
     return (
-        <li className={
-            `relative flex items-center py-2 px-3 my-1
-            font-medium rounded-md cursor-pointer transition-colors
-            ${
-                active ? "bg-gradient-to-tr from-indigo-200 to -indigo-100 text-indigo-800"
-                    : "hover:bg-indigo-50 text-gray-600"
-            }`
-        }>{icon}
-        <span className={"w-52 ml-3"}>{text}</span>
+        <div className={`
+            flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all mb-1
+            ${active ? "bg-indigo-50 text-indigo-600 font-medium" : "text-gray-600 hover:bg-gray-100"}
+            ${!expanded && "justify-center px-2"}
+        `}>
+            <div className="text-lg">{icon}</div>
+
+            {expanded && <span className="text-sm whitespace-nowrap">{text}</span>}
+
+            {/* Tooltip-style alert when collapsed, or dot when expanded */}
             {alert && (
-                <div className={'absolute right-2 w-2 h-2 rounded bg-indigo-400'}></div>
+                <span className={`bg-indigo-500 rounded-full ${expanded ? "ml-auto w-2 h-2" : "absolute right-2 w-2 h-2"}`} />
             )}
-        </li>
-    )
+        </div>
+    );
 }
