@@ -1,75 +1,95 @@
-import { MdMoreVert } from "react-icons/md";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { createContext, useContext, useState, type ReactNode } from "react";
-
-type SidebarContextType = { expanded: boolean };
-const SidebarContext = createContext<SidebarContextType | null>(null);
-
-export default function Sidebar({ children }: { children: ReactNode }) {
-    const [expanded, setExpanded] = useState(true);
-
+import {LuMenu} from "react-icons/lu";
+import {useState} from "react";
+import {MdBalance} from "react-icons/md";
+import {BiMoney} from "react-icons/bi";
+import {GrTransaction} from "react-icons/gr";
+import {
+    LineChart,
+    Line,
+    XAxis,
+    YAxis,
+    Tooltip,
+    ResponsiveContainer,
+    Cell
+} from "recharts"
+import {PieChart, Pie, } from "recharts"
+function Sidebar(){
+    const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+    const data=[
+        {day:"Mon", spending: 4000},
+        {day: "Tue", spending: 3000},
+        {day: "Wed", spending: 5000},
+        {day: "Thu",spending: 7000},
+        {day: "Fri", spending: 6000},
+    ]
+    const navItems= [
+        {name: "Balance", icon: MdBalance },
+        {name: "Transactions", icon: GrTransaction},
+        {name: "Budgets", icon: BiMoney}
+    ]
+    const types=[
+        {name:"Food", value: 400},
+        {name: "Bills", value: 300},
+        {name: "Transport", value: 200}
+    ]
+    const COLORS = ["#3b82f6", "#10b981", "#f59e0b"]
     return (
-        // Changed h-1 to h-screen and added dynamic width w-64 / w-20
-        <aside className="w-[240px] h-screen bg-white border-r">
-            {/* HEADER */}
-            <div className="h-16 flex items-center justify-between px-4 border-b">
-                {/* Hide text when collapsed */}
-                {expanded && <h1 className="text-lg font-semibold text-gray-800">My Dashboard</h1>}
-
-                <button
-                    onClick={() => setExpanded((v) => !v)}
-                    className={`p-2 rounded-md hover:bg-gray-100 transition ${!expanded && "mx-auto"}`}
-                >
-                    {expanded ? <FaChevronLeft size={14} /> : <FaChevronRight size={14} />}
-                </button>
-            </div>
-
-            {/* NAV */}
-            <SidebarContext.Provider value={{ expanded }}>
-                <nav className="flex-1 px-3 py-4 space-y-1">
-                    {children}
-                </nav>
-            </SidebarContext.Provider>
-
-            {/* FOOTER */}
-            <div className="border-t p-4 flex items-center gap-3">
-                <div className="w-10 h-10 min-w-[40px] rounded-full bg-indigo-500 text-white flex items-center justify-center font-semibold">
-                    JD
-                </div>
-
-                {expanded && (
-                    <div className="flex-1 flex items-center justify-between overflow-hidden">
-                        <div className="leading-4">
-                            <p className="text-sm font-medium truncate">John Doe</p>
-                            <p className="text-xs text-gray-500 truncate">Product Manager</p>
+        <>
+            <div className={"flex bg-gray-100 h-screen"}>
+                {/*Sidebar */}
+                <div className={`fixed bg-white w-64 h-screen shadow ${isSidebarOpen ? "translate-x-0": "-translate-x-64"} lg:translate-x-0 lg:static`}>
+                    <div className={"p-4 flex justify-between border-b "}>
+                        <div className={"text-xl font-bold "}>
+                            Logo
                         </div>
-                        <MdMoreVert />
+                        <button onClick={()=>setIsSidebarOpen(false)} className={"lg:hidden"}>X</button>
                     </div>
-                )}
+                    <div className={"p-4 space-y-2"}>
+                        {navItems.map((item)=>{
+                            return (
+                                <div className={"flex p-2 items-center gap-3 px-4 py-2 transition-all duration-200 hover:bg-gray-100 hover:translate-x-1"}>
+                                    <div className={"text-xl"}>{item.name}</div>
+                                    
+                                </div>
+                            )
+                        })}
+                    </div>
+                </div>
+                <main className={"flex-1"}>
+                    <header className={"bg-white flex justify-between p-4"}>
+                        <button className={"p-2 text-xl font-bold lg:hidden"} onClick={() => setIsSidebarOpen(true)}>
+                            <LuMenu />
+                        </button>
+                        <h1 className={"text-2xl font-bold mb-2"}>Dashboard</h1>
+                        <div className={"bg-gray-300 w-10 h-10 rounded-full"}></div>
+
+                    </header>
+                    <h1>This Week</h1>
+                    <div className={"w-full h-64 bg-white p-4 rounded-xl shadow"}>
+                        <ResponsiveContainer width={"100%"} height={"100%"}>
+                            <LineChart data={data}>
+                                <XAxis dataKey={"day"}></XAxis>
+                                <YAxis />
+                                <Tooltip />
+                                <Line type={"monotone"} dataKey={"spending"} stroke={"#3b82f6"} strokeWidth={3}/>
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </div>
+                    <h1>Categories</h1>
+                    <div>
+                        <PieChart width={300} height={300}>
+                            <Pie data={types} dataKey={"value"}>
+                                {data.map((_entry,index)=>(
+                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]}></Cell>
+                                ))}
+                            </Pie>
+                            <Tooltip />
+                        </PieChart>
+                    </div>
+                </main>
             </div>
-        </aside>
-    );
+        </>
+        )
 }
 
-export function SidebarItem({ icon, text, active, alert }: { icon: ReactNode; text: string; active?: boolean; alert?: boolean; }) {
-    const context = useContext(SidebarContext);
-    if (!context) return null;
-    const { expanded } = context;
-
-    return (
-        <div className={`
-            flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all mb-1
-            ${active ? "bg-indigo-50 text-indigo-600 font-medium" : "text-gray-600 hover:bg-gray-100"}
-            ${!expanded && "justify-center px-2"}
-        `}>
-            <div className="text-lg">{icon}</div>
-
-            {expanded && <span className="text-sm whitespace-nowrap">{text}</span>}
-
-            {/* Tooltip-style alert when collapsed, or dot when expanded */}
-            {alert && (
-                <span className={`bg-indigo-500 rounded-full ${expanded ? "ml-auto w-2 h-2" : "absolute right-2 w-2 h-2"}`} />
-            )}
-        </div>
-    );
-}
+export default Sidebar;
