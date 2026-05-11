@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+
 import type { Transaction } from "../types.ts";
 
 interface Props {
@@ -8,39 +9,136 @@ interface Props {
 function Transactions({ transactions }: Props) {
     const navigate = useNavigate();
 
+    const totalIncome = transactions
+        .filter(t => t.type === "income")
+        .reduce((sum, t) => sum + t.amount, 0);
+
+    const totalExpenses = transactions
+        .filter(t => t.type === "expense")
+        .reduce((sum, t) => sum + t.amount, 0);
+
+    const balance = totalIncome - totalExpenses;
+
     return (
-        <div className="p-4 min-h-screen bg-gray-100">
-
-            <div className="flex justify-between mb-4">
-                <h1 className="text-2xl font-bold">Transactions</h1>
-
-                <button
-                    onClick={() => navigate("/add")}
-                    className="bg-blue-500 text-white px-4 py-2 rounded-lg"
-                >
-                    + Add
-                </button>
-            </div>
-
-            <div className="bg-white p-4 rounded-xl shadow">
-
-                {transactions.length === 0 ? (
-                    <p>No transactions yet</p>
-                ) : (
-                    transactions.map((t, i) => (
-                        <div key={i} className="flex justify-between border-b py-2">
-                            <div>
-                                <p className="font-semibold">{t.title}</p>
-                                <p className="text-sm text-gray-500">{t.date}</p>
-                            </div>
-
-                            <p className={t.type === "income" ? "text-green-500" : "text-red-500"}>
-                                {t.type === "income" ? "+" : "-"}₦{t.amount}
+        <div className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-6xl space-y-6">
+                <section className="card overflow-hidden p-6 sm:p-8">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-600 dark:text-blue-400">
+                                Ledger
+                            </p>
+                            <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+                                Transactions
+                            </h1>
+                            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
+                                Review everything you have logged so far, check balances, and jump back into adding new entries.
                             </p>
                         </div>
-                    ))
-                )}
 
+                        <button
+                            onClick={() => navigate("/add")}
+                            className="btn-primary w-auto px-5 py-3 text-sm"
+                        >
+                            + Add Transaction
+                        </button>
+                    </div>
+
+                    <div className="mt-6 grid gap-4 sm:grid-cols-3">
+                        <div className="rounded-3xl border border-blue-200/70 bg-blue-50 p-5 dark:border-blue-500/20 dark:bg-blue-500/10">
+                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600 dark:text-blue-300">
+                                Balance
+                            </p>
+                            <p className={`mt-2 text-2xl font-black ${balance >= 0 ? "text-emerald-600" : "text-rose-600"} dark:${balance >= 0 ? "text-emerald-300" : "text-rose-300"}`}>
+                                NGN {Math.abs(balance).toLocaleString()}
+                            </p>
+                        </div>
+
+                        <div className="rounded-3xl border border-emerald-200/70 bg-emerald-50 p-5 dark:border-emerald-500/20 dark:bg-emerald-500/10">
+                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-300">
+                                Income
+                            </p>
+                            <p className="mt-2 text-2xl font-black text-emerald-600 dark:text-emerald-300">
+                                NGN {totalIncome.toLocaleString()}
+                            </p>
+                        </div>
+
+                        <div className="rounded-3xl border border-rose-200/70 bg-rose-50 p-5 dark:border-rose-500/20 dark:bg-rose-500/10">
+                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rose-600 dark:text-rose-300">
+                                Expenses
+                            </p>
+                            <p className="mt-2 text-2xl font-black text-rose-600 dark:text-rose-300">
+                                NGN {totalExpenses.toLocaleString()}
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <section className="card p-4 sm:p-6">
+                    {transactions.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center rounded-[1.75rem] border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center dark:border-slate-700 dark:bg-slate-900/40">
+                            <div className="rounded-full bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-700 dark:bg-blue-500/10 dark:text-blue-300">
+                                Nothing here yet
+                            </div>
+                            <h2 className="mt-4 text-2xl font-bold text-slate-900 dark:text-white">
+                                Start with your first transaction
+                            </h2>
+                            <p className="mt-2 max-w-md text-sm leading-6 text-slate-500 dark:text-slate-400">
+                                Add an expense or income entry to bring this view to life and make the dashboard more useful.
+                            </p>
+                            <button
+                                onClick={() => navigate("/add")}
+                                className="btn-primary mt-6 w-auto px-5 py-3 text-sm"
+                            >
+                                Add a transaction
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="overflow-hidden rounded-[1.75rem] border border-slate-200/70 dark:border-slate-700">
+                            <div className="hidden grid-cols-[1.5fr_0.8fr_0.8fr_0.7fr] gap-4 border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-400 md:grid">
+                                <span>Title</span>
+                                <span>Category</span>
+                                <span>Date</span>
+                                <span className="text-right">Amount</span>
+                            </div>
+
+                            <div className="divide-y divide-slate-200 dark:divide-slate-700">
+                                {transactions.map((t) => (
+                                    <div
+                                        key={t.id}
+                                        className="grid gap-3 px-5 py-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-900/40 md:grid-cols-[1.5fr_0.8fr_0.8fr_0.7fr] md:items-center"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className={`flex h-11 w-11 items-center justify-center rounded-2xl font-bold ${t.type === "income" ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300" : "bg-rose-100 text-rose-600 dark:bg-rose-500/10 dark:text-rose-300"}`}>
+                                                {t.type === "income" ? "+" : "-"}
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold text-slate-900 dark:text-white">
+                                                    {t.title}
+                                                </p>
+                                                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 md:hidden">
+                                                    {t.category || "No category"} • {t.date}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="text-sm text-slate-500 dark:text-slate-400">
+                                            {t.category || "No category"}
+                                        </div>
+
+                                        <div className="text-sm text-slate-500 dark:text-slate-400">
+                                            {t.date}
+                                        </div>
+
+                                        <div className={`text-right text-base font-bold ${t.type === "income" ? "text-emerald-600 dark:text-emerald-300" : "text-rose-600 dark:text-rose-300"}`}>
+                                            {t.type === "income" ? "+" : "-"}NGN {t.amount.toLocaleString()}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </section>
             </div>
         </div>
     );

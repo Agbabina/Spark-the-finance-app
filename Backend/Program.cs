@@ -36,14 +36,16 @@ builder.Services.AddAuthentication(options =>
     {
         jwtKey = "YourSuperSecretKeyHere12345678901234567890";
     }
+    var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "YourIssuer";
+    var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "YourAudience";
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
     };
 });

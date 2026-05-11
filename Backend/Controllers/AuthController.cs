@@ -60,7 +60,7 @@ public class AuthController : ControllerBase
         Console.WriteLine($"Login attempt: Username={model.Username}, Password length={model.Password?.Length ?? 0}");
 
         var user = await _userManager.FindByNameAsync(model.Username);
-        if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
+        if (user != null && await _userManager.CheckPasswordAsync(user, model.Password ?? string.Empty))
         {
             var token = GenerateJwtToken(user);
             Console.WriteLine("Login successful");
@@ -72,15 +72,13 @@ public class AuthController : ControllerBase
 
     private string GenerateJwtToken(User user)
     {
-        var jwtKey = _configuration["Jwt:Key"];
-        if (string.IsNullOrEmpty(jwtKey))
-        {
-            throw new InvalidOperationException("JWT Key is not configured");
-        }
+        var jwtKey = _configuration["Jwt:Key"] ?? "YourSuperSecretKeyHere12345678901234567890";
+        var issuer = _configuration["Jwt:Issuer"] ?? "YourIssuer";
+        var audience = _configuration["Jwt:Audience"] ?? "YourAudience";
 
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.UserName ?? ""),
+            new Claim(JwtRegisteredClaimNames.Sub, user.UserName ?? string.Empty),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
@@ -88,8 +86,8 @@ public class AuthController : ControllerBase
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Audience"],
+            issuer: issuer,
+            audience: audience,
             claims: claims,
             expires: DateTime.Now.AddMinutes(30),
             signingCredentials: creds);

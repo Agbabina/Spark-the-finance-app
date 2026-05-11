@@ -1,6 +1,5 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import axios from "axios";
 
 import Sidebar from "./Components/Sidebar.tsx";
 import AddTransaction from "./Pages/AddTransaction";
@@ -8,6 +7,7 @@ import Transactions from "./Pages/Transactions";
 import LoginPage from "./Pages/LoginPage";
 import "./App.css"
 import type {Transaction} from "./types";
+import { api, setApiAuthToken } from "./lib/api";
 
 function App() {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -16,10 +16,8 @@ function App() {
 
     useEffect(() => {
         const token = localStorage.getItem('token');
-        if (token) {
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-            setIsLoggedIn(true);
-        }
+        setApiAuthToken(token);
+        setIsLoggedIn(Boolean(token));
     }, []);
 
     useEffect(() => {
@@ -30,7 +28,7 @@ function App() {
 
     const fetchTransactions = async () => {
         try {
-            const response = await axios.get('http://localhost:5219/api/transactions');
+            const response = await api.get('/api/transactions');
             setTransactions(response.data);
         } catch (error) {
             console.error('Error fetching transactions:', error);
@@ -38,12 +36,18 @@ function App() {
     };
 
     return (
-        <div className={darkMode ? "dark" : ""}>
+        <div className={`${darkMode ? "dark" : ""} app-shell`}>
             <BrowserRouter>
                 <Routes>
                     <Route
                         path="/login"
-                        element={<LoginPage setIsLoggedIn={setIsLoggedIn} />}
+                        element={
+                            isLoggedIn ? (
+                                <Navigate to="/" replace />
+                            ) : (
+                                <LoginPage setIsLoggedIn={setIsLoggedIn} />
+                            )
+                        }
                     />
                     <Route
                         path="/"
@@ -68,7 +72,7 @@ function App() {
                                     darkMode={darkMode}
                                 />
                             ) : (
-                                <LoginPage setIsLoggedIn={setIsLoggedIn} />
+                                <Navigate to="/login" replace />
                             )
                         }
                     />
@@ -80,7 +84,7 @@ function App() {
                                     transactions={transactions}
                                 />
                             ) : (
-                                <LoginPage setIsLoggedIn={setIsLoggedIn} />
+                                <Navigate to="/login" replace />
                             )
                         }
                     />

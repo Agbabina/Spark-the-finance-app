@@ -1,1 +1,166 @@
-@import "tailwindcss";
+#root {
+  min-height: 100vh;
+}
+
+.app-shell {
+  min-height: 100vh;
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 34%),
+    radial-gradient(circle at top right, rgba(16, 185, 129, 0.12), transparent 28%),
+    linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
+  color: #0f172a;
+}
+
+.app-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(15, 23, 42, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
+  background-size: 36px 36px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.7), transparent 80%);
+  opacity: 0.55;
+}
+
+.app-shell.dark {
+  background:
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.22), transparent 36%),
+    radial-gradient(circle at top right, rgba(14, 165, 233, 0.16), transparent 30%),
+    linear-gradient(180deg, #020617 0%, #0f172a 100%);
+  color: #e2e8f0;
+}
+
+.app-shell.dark::before {
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.07) 1px, transparent 1px);
+  opacity: 0.28;
+}
+
+.surface {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(22px);
+}
+
+.dark .surface {
+  background: rgba(15, 23, 42, 0.72);
+  border-color: rgba(148, 163, 184, 0.18);
+  box-shadow: 0 24px 80px rgba(2, 6, 23, 0.45);
+}
+
+.soft-panel {
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  backdrop-filter: blur(18px);
+}
+
+.dark .soft-panel {
+  background: rgba(15, 23, 42, 0.48);
+  border-color: rgba(148, 163, 184, 0.14);
+}
+
+.input-field {
+  width: 100%;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0.95rem 1rem;
+  color: #0f172a;
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease, background 160ms ease;
+}
+
+.input-field::placeholder {
+  color: #94a3b8;
+}
+
+.input-field:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.14);
+  transform: translateY(-1px);
+}
+
+.dark .input-field {
+  background: rgba(15, 23, 42, 0.72);
+  border-color: rgba(148, 163, 184, 0.22);
+  color: #e2e8f0;
+}
+
+.dark .input-field::placeholder {
+  color: #64748b;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  border: 0;
+  border-radius: 16px;
+  padding: 0.95rem 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  box-shadow: 0 18px 30px rgba(37, 99, 235, 0.22);
+  transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 22px 40px rgba(37, 99, 235, 0.28);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  padding: 0.95rem 1.1rem;
+  font-weight: 600;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.55);
+  transition: background 160ms ease, transform 160ms ease, border-color 160ms ease;
+}
+
+.btn-secondary:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.78);
+  border-color: rgba(59, 130, 246, 0.35);
+}
+
+.dark .btn-secondary {
+  background: rgba(15, 23, 42, 0.55);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.dark .btn-secondary:hover {
+  background: rgba(15, 23, 42, 0.78);
+}
+
+.card {
+  border-radius: 28px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 22px 70px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(20px);
+}
+
+.dark .card {
+  background: rgba(15, 23, 42, 0.72);
+  border-color: rgba(148, 163, 184, 0.16);
+  box-shadow: 0 22px 70px rgba(2, 6, 23, 0.42);
+}

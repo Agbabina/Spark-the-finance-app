@@ -17,8 +17,19 @@ public class TransactionService
 
     public void Add(Transaction transaction)
     {
-        _context.Transactions.Add(transaction);
-        _context.SaveChanges();
+        try
+        {
+            Console.WriteLine($"Adding transaction to context: {transaction.Title}");
+            _context.Transactions.Add(transaction);
+            Console.WriteLine("Saving changes...");
+            _context.SaveChanges();
+            Console.WriteLine($"Transaction saved with Id={transaction.Id}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving transaction: {ex.Message}");
+            throw;
+        }
     }
 
     public void Delete(int id)

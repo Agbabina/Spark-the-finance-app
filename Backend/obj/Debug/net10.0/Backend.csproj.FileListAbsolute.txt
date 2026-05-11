@@ -270,3 +270,4 @@ C:\Users\user\WebstormProjects\Massive Project\Backend\bin\Debug\net10.0\Microso
 C:\Users\user\WebstormProjects\Massive Project\Backend\bin\Debug\net10.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
 C:\Users\user\WebstormProjects\Massive Project\Backend\bin\Debug\net10.0\Microsoft.IdentityModel.Tokens.dll
 C:\Users\user\WebstormProjects\Massive Project\Backend\bin\Debug\net10.0\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\user\WebstormProjects\Massive Project\Backend\obj\Debug\net10.0\Backend.sourcelink.json
