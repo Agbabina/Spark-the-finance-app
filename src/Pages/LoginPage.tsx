@@ -7,9 +7,10 @@ import { api, setApiAuthToken } from "../lib/api";
 
 interface Props {
     setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
+    setUsername: React.Dispatch<React.SetStateAction<string>>;
 }
 
-function LoginPage({ setIsLoggedIn }: Props) {
+function LoginPage({ setIsLoggedIn, setUsername }: Props) {
     const navigate = useNavigate();
     const [isRegister, setIsRegister] = useState(false);
     const [form, setForm] = useState({
@@ -38,7 +39,9 @@ function LoginPage({ setIsLoggedIn }: Props) {
                 const loginData = { username: form.username, password: form.password };
                 const response = await api.post("/api/auth/login", loginData);
                 localStorage.setItem("token", response.data.token);
+                localStorage.setItem("username", form.username);
                 setApiAuthToken(response.data.token);
+                setUsername(form.username);
                 setIsLoggedIn(true);
                 navigate("/", { replace: true });
             }

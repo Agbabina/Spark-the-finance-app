@@ -1,18 +1,28 @@
 @import "tailwindcss";
 
+@font-face{
+  font-family: "Manrope";
+  src: url("../src/assets/Manrope.ttf") format('truetype');
+  font-weight:normal;
+  font-style:normal;
+}
+
+@font-face{
+  font-family: "SpaceGrotesk";
+  src: url("../src/assets/SpaceGrotesk.ttf") format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 :root {
-  color-scheme: light;
-  font-family: Inter, "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-family: "SpaceGrotesk";
 }
 
 html,
 body,
 #root {
   min-height: 100%;
+  font-family:"Manrope"
 }
 
 body {
@@ -23,6 +33,13 @@ body {
 
 * {
   box-sizing: border-box;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
 }
 
 ::selection {

@@ -4,9 +4,10 @@ import type { Transaction } from "../types.ts";
 
 interface Props {
     transactions: Transaction[];
+    username: string;
 }
 
-function Transactions({ transactions }: Props) {
+function Transactions({ transactions, username }: Props) {
     const navigate = useNavigate();
 
     const totalIncome = transactions
@@ -29,7 +30,7 @@ function Transactions({ transactions }: Props) {
                                 Ledger
                             </p>
                             <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-900 dark:text-white">
-                                Transactions
+                                {username ? `Hey ${username},` : "Transactions"}
                             </h1>
                             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
                                 Review everything you have logged so far, check balances, and jump back into adding new entries.

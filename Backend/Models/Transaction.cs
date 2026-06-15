@@ -11,4 +11,8 @@ public class Transaction
     public decimal Amount { get; set; }
     public string? Type { get; set; } // "income" or "expense"
     public DateTime Date { get; set; }
+    
+    // User association
+    public string UserId { get; set; } = string.Empty;
+    public User? User { get; set; }
 }

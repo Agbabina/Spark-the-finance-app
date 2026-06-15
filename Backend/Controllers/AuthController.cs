@@ -57,10 +57,23 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
-        Console.WriteLine($"Login attempt: Username={model.Username}, Password length={model.Password?.Length ?? 0}");
+        var loginIdentifier = model.Username?.Trim();
+        if (string.IsNullOrWhiteSpace(loginIdentifier))
+        {
+            loginIdentifier = model.Email?.Trim();
+        }
 
-        var user = await _userManager.FindByNameAsync(model.Username);
-        if (user != null && await _userManager.CheckPasswordAsync(user, model.Password ?? string.Empty))
+        Console.WriteLine($"Login attempt: Identifier={loginIdentifier}, Password length={model.Password?.Length ?? 0}");
+
+        if (string.IsNullOrWhiteSpace(loginIdentifier) || string.IsNullOrWhiteSpace(model.Password))
+        {
+            return BadRequest(new { message = "Username or email and password are required" });
+        }
+
+        var user = await _userManager.FindByNameAsync(loginIdentifier)
+            ?? await _userManager.FindByEmailAsync(loginIdentifier);
+
+        if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
         {
             var token = GenerateJwtToken(user);
             Console.WriteLine("Login successful");
@@ -78,7 +91,9 @@ public class AuthController : ControllerBase
 
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.UserName ?? string.Empty),
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id ?? string.Empty),
+            new Claim(ClaimTypes.NameIdentifier, user.Id ?? string.Empty),
+            new Claim("username", user.UserName ?? string.Empty),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
@@ -106,5 +121,6 @@ public class RegisterModel
 public class LoginModel
 {
     public string Username { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
 }

@@ -4,14 +4,64 @@ import axios from "axios";
 
 import Input from "../Components/Input";
 import type { Transaction } from "../types.ts";
-import { api } from "../lib/api";
+import { api, setApiAuthToken } from "../lib/api";
+
+// JWT helpers
+interface JwtPayload {
+    exp?: number;
+    [key: string]: unknown;
+}
+
+function parseJwt(token: string | null): JwtPayload | null {
+    if (!token) return null;
+    try {
+        const payload = token.split(".")[1];
+        const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+        const decoded = decodeURIComponent(
+            atob(base64)
+                .split("")
+                .map((c) => `%${c.charCodeAt(0).toString(16).padStart(2, "0")}`)
+                .join("")
+        );
+        return JSON.parse(decoded) as JwtPayload;
+    } catch {
+        return null;
+    }
+}
+
+function isTokenExpired(token: string | null) {
+    const payload = parseJwt(token);
+    if (!payload) return false;
+    if (typeof payload.exp !== "number") return false;
+    const now = Math.floor(Date.now() / 1000);
+    return payload.exp < now;
+}
+
+const expenseCategories = [
+    "Food",
+    "Groceries",
+    "Bills",
+    "Rent",
+    "Transport",
+    "Health",
+    "Shopping",
+    "Entertainment",
+    "Education",
+    "Subscriptions",
+    "Travel",
+    "Savings",
+    "Debt",
+    "Other"
+] as const;
 
 interface Props {
     setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>;
     darkMode: boolean;
+    username: string;
+    setGlobalError: React.Dispatch<React.SetStateAction<string>>;
 }
 
-function AddTransaction({ setTransactions }: Props) {
+function AddTransaction({ setTransactions, username, setGlobalError }: Props) {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
@@ -46,34 +96,56 @@ function AddTransaction({ setTransactions }: Props) {
             const token = localStorage.getItem("token");
 
             if (!token) {
+                const msg = "Not authenticated. Please login.";
+                setErrorMessage(msg);
+                setGlobalError(msg);
                 navigate("/login");
                 return;
             }
+
+            if (isTokenExpired(token)) {
+                const msg = "Session expired. Please login again.";
+                setErrorMessage(msg);
+                setGlobalError(msg);
+                localStorage.removeItem("token");
+                setApiAuthToken(null);
+                navigate("/login");
+                return;
+            }
+
+            // Ensure the api instance has the token set
+            setApiAuthToken(token);
 
             const transactionData = {
                 ...form,
                 date: new Date(form.date + 'T00:00:00').toISOString()
             };
 
-            const response = await api.post("/api/transactions", transactionData, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const response = await api.post("/api/transactions", transactionData);
 
             setTransactions(prev => [...prev, response.data]);
             navigate("/");
         } catch (error) {
+            let message = "Failed to save transaction";
             if (axios.isAxiosError(error)) {
-                const message =
-                    error.response?.data?.message ||
-                    error.response?.data ||
-                    error.message ||
-                    "Failed to save transaction";
-                setErrorMessage(typeof message === "string" ? message : "Failed to save transaction");
-            } else {
-                setErrorMessage("Failed to save transaction");
+                if (error.response?.status === 401) {
+                    message = "Unauthorized. Please login again.";
+                    localStorage.removeItem("token");
+                    setApiAuthToken(null);
+                    navigate("/login");
+                } else {
+                    message =
+                        error.response?.data?.message ||
+                        error.response?.data ||
+                        error.message ||
+                        message;
+                }
+            } else if (error instanceof Error) {
+                message = error.message;
             }
+            const displayMessage = typeof message === "string" ? message : "Failed to save transaction";
+            setErrorMessage(displayMessage);
+            setGlobalError(displayMessage);
             //! Manage edge case
             console.error("Error adding transaction:", error);
         } finally {
@@ -99,7 +171,7 @@ function AddTransaction({ setTransactions }: Props) {
                                 Add Transaction
                             </h1>
                             <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
-                                Record what came in or went out and keep your cash flow dashboard current.
+                                {username ? `Hi ${username}, record what came in or went out and keep your dashboard sharp.` : "Record what came in or went out and keep your cash flow dashboard current."}
                             </p>
                         </div>
 
@@ -182,10 +254,12 @@ function AddTransaction({ setTransactions }: Props) {
                                     onChange={handleChange}
                                     className="input-field"
                                 >
-                                    <option value="Food">Food</option>
-                                    <option value="Bills">Bills</option>
-                                    <option value="Transport">Transport</option>
-                                    <option value="Other">Other</option>
+                                    <option value="">Select a category</option>
+                                    {expenseCategories.map((category) => (
+                                        <option key={category} value={category}>
+                                            {category}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                         )}

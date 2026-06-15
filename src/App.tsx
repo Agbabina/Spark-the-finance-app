@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
+import "./index.css";
 import Sidebar from "./Components/Sidebar.tsx";
 import AddTransaction from "./Pages/AddTransaction";
 import Transactions from "./Pages/Transactions";
@@ -13,11 +14,54 @@ function App() {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [darkMode, setDarkMode] = useState<boolean>(false);
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+    const [username, setUsername] = useState<string>("");
+    const [globalError, setGlobalError] = useState<string>("");
+
+    const decodeTokenUsername = (token: string) => {
+        try {
+            const payload = token.split(".")[1];
+            const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+            const decoded = decodeURIComponent(
+                atob(base64)
+                    .split("")
+                    .map((c) => `%${c.charCodeAt(0).toString(16).padStart(2, "0")}`)
+                    .join("")
+            );
+            const parsed = JSON.parse(decoded);
+            return parsed.username || parsed.sub || "";
+        } catch {
+            return "";
+        }
+    };
+
+    const logout = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("username");
+        setApiAuthToken(null);
+        setIsLoggedIn(false);
+        setUsername("");
+        setGlobalError("");
+    };
 
     useEffect(() => {
         const token = localStorage.getItem('token');
+        const savedUsername = localStorage.getItem('username') || (token ? decodeTokenUsername(token) : "");
         setApiAuthToken(token);
         setIsLoggedIn(Boolean(token));
+        if (savedUsername) {
+            setUsername(savedUsername);
+        }
+    }, []);
+
+    useEffect(() => {
+        const handleUnauthorized = (e: Event) => {
+            const detail = (e as CustomEvent)?.detail;
+            logout();
+            setGlobalError(detail?.message || 'Session expired. Please login.');
+        };
+
+        window.addEventListener('auth:unauthorized', handleUnauthorized as EventListener);
+        return () => window.removeEventListener('auth:unauthorized', handleUnauthorized as EventListener);
     }, []);
 
     useEffect(() => {
@@ -30,8 +74,11 @@ function App() {
         try {
             const response = await api.get('/api/transactions');
             setTransactions(response.data);
-        } catch (error) {
+            setGlobalError("");
+        } catch (error: unknown) {
             console.error('Error fetching transactions:', error);
+            const message = error instanceof Error ? error.message : 'Failed to fetch transactions';
+            setGlobalError(message);
         }
     };
 
@@ -45,7 +92,7 @@ function App() {
                             isLoggedIn ? (
                                 <Navigate to="/" replace />
                             ) : (
-                                <LoginPage setIsLoggedIn={setIsLoggedIn} />
+                                <LoginPage setIsLoggedIn={setIsLoggedIn} setUsername={setUsername} />
                             )
                         }
                     />
@@ -57,9 +104,12 @@ function App() {
                                     transactions={transactions}
                                     darkMode={darkMode}
                                     setDarkMode={setDarkMode}
+                                    username={username}
+                                    devError={globalError}
+                                    onLogout={logout}
                                 />
                             ) : (
-                                <LoginPage setIsLoggedIn={setIsLoggedIn} />
+                                <LoginPage setIsLoggedIn={setIsLoggedIn} setUsername={setUsername} />
                             )
                         }
                     />
@@ -70,6 +120,8 @@ function App() {
                                 <AddTransaction
                                     setTransactions={setTransactions}
                                     darkMode={darkMode}
+                                    username={username}
+                                    setGlobalError={setGlobalError}
                                 />
                             ) : (
                                 <Navigate to="/login" replace />
@@ -82,6 +134,7 @@ function App() {
                             isLoggedIn ? (
                                 <Transactions
                                     transactions={transactions}
+                                    username={username}
                                 />
                             ) : (
                                 <Navigate to="/login" replace />

@@ -70,6 +70,7 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.EnsureCreated();
+    EnsureTransactionUserIdColumn(db);
 }
 
 app.UseCors("AllowReact");
@@ -77,3 +78,50 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
+
+static void EnsureTransactionUserIdColumn(AppDbContext db)
+{
+    // Repair older SQLite databases that were created before Transaction.UserId existed.
+    var connection = db.Database.GetDbConnection();
+    var shouldClose = connection.State != System.Data.ConnectionState.Open;
+
+    if (shouldClose)
+    {
+        connection.Open();
+    }
+
+    try
+    {
+        var hasUserIdColumn = false;
+
+        using (var pragmaCommand = connection.CreateCommand())
+        {
+            pragmaCommand.CommandText = "PRAGMA table_info(Transactions);";
+            using var reader = pragmaCommand.ExecuteReader();
+
+            while (reader.Read())
+            {
+                var columnName = reader.GetString(1);
+                if (string.Equals(columnName, "UserId", StringComparison.OrdinalIgnoreCase))
+                {
+                    hasUserIdColumn = true;
+                    break;
+                }
+            }
+        }
+
+        if (!hasUserIdColumn)
+        {
+            using var alterCommand = connection.CreateCommand();
+            alterCommand.CommandText = "ALTER TABLE Transactions ADD COLUMN UserId TEXT NOT NULL DEFAULT '';";
+            alterCommand.ExecuteNonQuery();
+        }
+    }
+    finally
+    {
+        if (shouldClose)
+        {
+            connection.Close();
+        }
+    }
+}

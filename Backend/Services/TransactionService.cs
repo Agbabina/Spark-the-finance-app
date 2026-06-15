@@ -11,9 +11,9 @@ public class TransactionService
         _context = context;
     }
 
-    public List<Transaction> GetAll() => _context.Transactions.ToList();
+    public List<Transaction> GetAll(string userId) => _context.Transactions.Where(t => t.UserId == userId).ToList();
 
-    public Transaction? Get(int id) => _context.Transactions.FirstOrDefault(t => t.Id == id);
+    public Transaction? Get(int id, string userId) => _context.Transactions.FirstOrDefault(t => t.Id == id && t.UserId == userId);
 
     public void Add(Transaction transaction)
     {
@@ -27,14 +27,18 @@ public class TransactionService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error saving transaction: {ex.Message}");
+            Console.WriteLine($"Error saving transaction: {ex}");
+            if (ex.InnerException != null)
+            {
+                Console.WriteLine($"Inner exception: {ex.InnerException}");
+            }
             throw;
         }
     }
 
-    public void Delete(int id)
+    public void Delete(int id, string userId)
     {
-        var transaction = Get(id);
+        var transaction = Get(id, userId);
         if (transaction != null)
         {
             _context.Transactions.Remove(transaction);
@@ -42,9 +46,15 @@ public class TransactionService
         }
     }
 
-    public void Update(Transaction transaction)
+    public void Update(Transaction transaction, string userId)
     {
-        _context.Transactions.Update(transaction);
-        _context.SaveChanges();
+        var existing = Get(transaction.Id, userId);
+        if (existing != null)
+        {
+            _context.Transactions.Update(transaction);
+            _context.SaveChanges();
+        }
     }
+
+    public bool UserExists(string userId) => _context.Users.Any(u => u.Id == userId);
 }

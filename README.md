@@ -15,7 +15,7 @@ A modern, full-stack personal finance management application built with React, T
 
 ### 🔐 Security & Authentication
 - **JWT Authentication**: Secure user authentication with JSON Web Tokens
-- **User Registration**: Create new accounts with email and password
+- **User Registration**: Create new accounts with username, email, and password
 - **Protected Routes**: Secure API endpoints and frontend routes
 - **Password Security**: ASP.NET Identity with configurable password policies
 
@@ -117,7 +117,7 @@ Open your browser and navigate to `http://localhost:5173` to access the FinanceT
 
 ### Getting Started
 
-1. **Register**: Create a new account with your email and password
+1. **Register**: Create a new account with your username, email, and password
 2. **Login**: Sign in to access your personal dashboard
 3. **Add Transactions**: Start tracking your income and expenses
 4. **View Analytics**: Monitor your financial health with charts and summaries
@@ -256,6 +256,7 @@ Register a new user account.
 **Request Body:**
 ```json
 {
+  "username": "user123",
   "email": "user@example.com",
   "password": "SecurePassword123!"
 }
@@ -267,10 +268,12 @@ Authenticate and receive JWT token.
 **Request Body:**
 ```json
 {
-  "email": "user@example.com",
+  "username": "user123",
   "password": "SecurePassword123!"
 }
 ```
+
+You can also send `email` instead of `username` if you want to sign in with an email address.
 
 **Response:**
 ```json
