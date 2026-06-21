@@ -30,6 +30,9 @@ public class TransactionControllerTests
         var controller = new TransactionController(service);
 
         var userId = "user1";
+        db.Users.Add(new User { Id = userId, UserName = "testuser", Email = "test@example.com" });
+        db.SaveChanges();
+
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, userId),

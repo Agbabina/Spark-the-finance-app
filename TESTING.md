@@ -30,12 +30,12 @@ npm run test:ui
 
 ### Frontend Test Coverage
 
-- ✅ Login/Register form submission
-- ✅ Error handling and validation
-- ✅ JWT token management
-- ✅ localStorage integration
-- ✅ API client configuration
-- ✅ Route protection and redirects
+-  Login/Register form submission
+-  Error handling and validation
+-  JWT token management
+-  localStorage integration
+-  API client configuration
+-  Route protection and redirects
 
 ---
 
@@ -74,11 +74,11 @@ dotnet test --verbosity normal
 
 ### Backend Test Coverage
 
-- ✅ User registration and password validation
-- ✅ User authentication and JWT generation
-- ✅ Transaction CRUD operations
-- ✅ User data isolation (transactions filtered by UserId)
-- ✅ Error handling
+-  User registration and password validation
+-  User authentication and JWT generation
+-  Transaction CRUD operations
+-  User data isolation (transactions filtered by UserId)
+-  Error handling
 
 ---
 

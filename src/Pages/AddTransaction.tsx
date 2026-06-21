@@ -5,6 +5,7 @@ import axios from "axios";
 import Input from "../Components/Input";
 import type { Transaction } from "../types.ts";
 import { api, setApiAuthToken } from "../lib/api";
+import { expenseCategories } from "../lib/categories";
 
 // JWT helpers
 interface JwtPayload {
@@ -37,23 +38,6 @@ function isTokenExpired(token: string | null) {
     return payload.exp < now;
 }
 
-const expenseCategories = [
-    "Food",
-    "Groceries",
-    "Bills",
-    "Rent",
-    "Transport",
-    "Health",
-    "Shopping",
-    "Entertainment",
-    "Education",
-    "Subscriptions",
-    "Travel",
-    "Savings",
-    "Debt",
-    "Other"
-] as const;
-
 interface Props {
     setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>;
     darkMode: boolean;
@@ -61,7 +45,7 @@ interface Props {
     setGlobalError: React.Dispatch<React.SetStateAction<string>>;
 }
 
-function AddTransaction({ setTransactions, username, setGlobalError }: Props) {
+function AddTransaction({ setTransactions, darkMode: _darkMode, username, setGlobalError }: Props) {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
@@ -146,7 +130,6 @@ function AddTransaction({ setTransactions, username, setGlobalError }: Props) {
             const displayMessage = typeof message === "string" ? message : "Failed to save transaction";
             setErrorMessage(displayMessage);
             setGlobalError(displayMessage);
-            //! Manage edge case
             console.error("Error adding transaction:", error);
         } finally {
             setLoading(false);
@@ -270,7 +253,7 @@ function AddTransaction({ setTransactions, username, setGlobalError }: Props) {
                     </div>
                 </form>
 
-                <aside className="surface rounded-[2rem] p-6 sm:p-8">
+                <aside className="surface rounded-4xl p-6 sm:p-8">
                     <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-600 dark:text-blue-400">
                         Preview
                     </p>

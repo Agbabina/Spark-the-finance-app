@@ -1,9 +1,11 @@
-import { useState } from "react";
-import { LuMenu } from "react-icons/lu";
+import { type FormEvent, useMemo, useState } from "react";
+import { LuBadgeCheck, LuBrainCircuit, LuMenu, LuSend, LuSparkles, LuTriangleAlert, LuWifiOff } from "react-icons/lu";
 import { MdBalance, MdTrendingDown, MdTrendingUp } from "react-icons/md";
 import { GrTransaction } from "react-icons/gr";
 import { useLocation, useNavigate } from "react-router-dom";
 import { BiPlus, BiWallet, BiCreditCard } from "react-icons/bi";
+import { MdAccountBalanceWallet } from "react-icons/md";
+import { BsBullseye } from "react-icons/bs";
 import {
     LineChart,
     Line,
@@ -17,9 +19,20 @@ import {
 } from "recharts";
 
 import type { Transaction } from "../types.ts";
+import type { AiInsight, AiQuestionResponse, Budget, Goal } from "../types.ts";
+import { api } from "../lib/api.ts";
+
+interface SmartInsight {
+    title: string;
+    value: string;
+    detail: string;
+    tone: "blue" | "emerald" | "amber" | "rose" | "slate";
+}
 
 interface Props {
     transactions: Transaction[];
+    budgets: Budget[];
+    goals: Goal[];
     darkMode: boolean;
     setDarkMode: (value: boolean) => void;
     username: string;
@@ -27,14 +40,52 @@ interface Props {
     onLogout: () => void;
 }
 
-function Sidebar({ transactions, darkMode, setDarkMode, username, devError, onLogout }: Props) {
+const daysInCurrentMonth = () => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+};
+
+const normalize = (value: string) => value.trim().toLowerCase();
+
+const categoryHints: Array<{ category: string; keywords: string[] }> = [
+    { category: "Food", keywords: ["restaurant", "meal", "lunch", "dinner", "kfc", "chicken", "pizza", "cafe"] },
+    { category: "Groceries", keywords: ["grocery", "supermarket", "shoprite", "market", "mart", "store"] },
+    { category: "Transport", keywords: ["uber", "bolt", "bus", "taxi", "fuel", "petrol", "transport"] },
+    { category: "Bills", keywords: ["electric", "power", "internet", "airtime", "data", "water", "bill"] },
+    { category: "Subscriptions", keywords: ["netflix", "spotify", "apple", "prime", "subscription", "youtube"] },
+    { category: "Health", keywords: ["pharmacy", "hospital", "clinic", "doctor", "medicine"] },
+    { category: "Education", keywords: ["school", "course", "book", "tuition", "udemy"] },
+    { category: "Debt", keywords: ["loan", "debt", "repay", "repayment"] },
+    { category: "Savings", keywords: ["save", "savings", "investment", "deposit"] }
+];
+
+const guessCategory = (title: string) => {
+    const text = normalize(title);
+    return categoryHints.find((hint) => hint.keywords.some((keyword) => text.includes(keyword)))?.category ?? "Other";
+};
+
+const sameMonth = (date: string) => {
+    const parsed = new Date(date);
+    const now = new Date();
+    return parsed.getMonth() === now.getMonth() && parsed.getFullYear() === now.getFullYear();
+};
+
+function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username, devError, onLogout }: Props) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [aiInsight, setAiInsight] = useState<AiInsight | null>(null);
+    const [aiLoading, setAiLoading] = useState(false);
+    const [aiError, setAiError] = useState("");
+    const [onlineQuestion, setOnlineQuestion] = useState("");
+    const [onlineAnswer, setOnlineAnswer] = useState("");
+    const [onlineQuestionLoading, setOnlineQuestionLoading] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
-
+    //I love react router
     const navItems = [
         { name: "Dashboard", icon: MdBalance, path: "/" },
         { name: "Transactions", icon: GrTransaction, path: "/transactions" },
+        { name: "Budgets", icon: MdAccountBalanceWallet, path: "/budgets" },
+        { name: "Goals", icon: BsBullseye, path: "/goals" },
         { name: "Add Transaction", icon: BiPlus, path: "/add" }
     ];
 
@@ -70,7 +121,285 @@ function Sidebar({ transactions, darkMode, setDarkMode, username, devError, onLo
         value: categoryMap[key]
     }));
 
+    const currentMonth = new Date().getMonth() + 1;
+    const currentBudgets = budgets.filter((budget) => budget.month === currentMonth && budget.year === new Date().getFullYear());
+    const currentBudgetLimit = currentBudgets.reduce((sum, budget) => sum + budget.limit, 0);
+    const currentBudgetSpent = currentBudgets.reduce((sum, budget) => {
+        const spent = transactions
+            .filter(
+                (transaction) =>
+                    transaction.type === "expense" &&
+                    transaction.category === budget.category &&
+                    new Date(transaction.date).getMonth() + 1 === budget.month &&
+                    new Date(transaction.date).getFullYear() === budget.year
+            )
+            .reduce((transactionSum, transaction) => transactionSum + transaction.amount, 0);
+        return sum + spent;
+    }, 0);
+
+    const totalGoalTarget = goals.reduce((sum, goal) => sum + goal.targetAmount, 0);
+    const totalGoalSaved = goals.reduce((sum, goal) => sum + goal.currentAmount, 0);
+    const currentMonthExpenses = transactions
+        .filter((transaction) => transaction.type === "expense" && sameMonth(transaction.date))
+        .reduce((sum, transaction) => sum + transaction.amount, 0);
+    const currentMonthIncome = transactions
+        .filter((transaction) => transaction.type === "income" && sameMonth(transaction.date))
+        .reduce((sum, transaction) => sum + transaction.amount, 0);
+    const elapsedDays = Math.max(new Date().getDate(), 1);
+    const monthProgress = elapsedDays / daysInCurrentMonth();
+    const projectedMonthExpenses = monthProgress > 0 ? currentMonthExpenses / monthProgress : currentMonthExpenses;
+    const projectedBalance = currentMonthIncome - projectedMonthExpenses;
+    const savingsRate = currentMonthIncome > 0 ? ((currentMonthIncome - currentMonthExpenses) / currentMonthIncome) * 100 : 0;
+
     const COLORS = ["#2563eb", "#7c3aed", "#10b981", "#f59e0b", "#ef4444"];
+
+    const smartInsights = useMemo<SmartInsight[]>(() => {
+        const topCategory = pieData
+            .slice()
+            .sort((a, b) => b.value - a.value)[0];
+        const overBudget = currentBudgets
+            .map((budget) => {
+                const spent = transactions
+                    .filter(
+                        (transaction) =>
+                            transaction.type === "expense" &&
+                            transaction.category === budget.category &&
+                            sameMonth(transaction.date)
+                    )
+                    .reduce((sum, transaction) => sum + transaction.amount, 0);
+                return { budget, spent };
+            })
+            .filter(({ budget, spent }) => spent > budget.limit)
+            .sort((a, b) => b.spent - b.budget.limit - (a.spent - a.budget.limit));
+
+        const nearestGoal = goals
+            .filter((goal) => goal.targetAmount > goal.currentAmount)
+            .slice()
+            .sort((a, b) => {
+                if (!a.targetDate) return 1;
+                if (!b.targetDate) return -1;
+                return new Date(a.targetDate).getTime() - new Date(b.targetDate).getTime();
+            })[0];
+
+        return [
+            {
+                title: "Offline forecast",
+                value: formatCurrency(Math.max(projectedMonthExpenses, 0)),
+                detail: `At your current pace, this month may end near ${formatCurrency(Math.max(projectedMonthExpenses, 0))} in expenses.`,
+                tone: projectedBalance >= 0 ? "emerald" : "rose"
+            },
+            {
+                title: "Savings rate",
+                value: `${Math.round(savingsRate)}%`,
+                detail: savingsRate >= 20
+                    ? "You are above a strong 20% savings target."
+                    : "Try moving money to goals before flexible spending grows.",
+                tone: savingsRate >= 20 ? "emerald" : "amber"
+            },
+            {
+                title: "Top category",
+                value: topCategory?.name ?? "None yet",
+                detail: topCategory
+                    ? `${topCategory.name} is taking the biggest share at ${formatCurrency(topCategory.value)}.`
+                    : "Add categorized expenses to unlock better pattern detection.",
+                tone: topCategory ? "blue" : "slate"
+            },
+            {
+                title: "Budget watch",
+                value: overBudget.length > 0 ? `${overBudget.length} over` : "On track",
+                detail: overBudget.length > 0
+                    ? `${overBudget[0].budget.category} is over by ${formatCurrency(overBudget[0].spent - overBudget[0].budget.limit)}.`
+                    : "No active monthly budget has crossed its limit.",
+                tone: overBudget.length > 0 ? "rose" : "emerald"
+            },
+            {
+                title: "Goal planner",
+                value: nearestGoal?.title ?? "Add goal",
+                detail: nearestGoal
+                    ? `${formatCurrency(nearestGoal.targetAmount - nearestGoal.currentAmount)} left to reach ${nearestGoal.title}.`
+                    : "Create one goal so Spark can calculate a savings path.",
+                tone: nearestGoal ? "amber" : "slate"
+            }
+        ];
+    }, [currentBudgets, goals, pieData, projectedBalance, projectedMonthExpenses, savingsRate, transactions]);
+
+    const duplicateCharges = useMemo(() => {
+        const seen = new Map<string, Transaction[]>();
+        transactions
+            .filter((transaction) => transaction.type === "expense")
+            .forEach((transaction) => {
+                const key = `${normalize(transaction.title)}-${transaction.amount}-${transaction.date}`;
+                seen.set(key, [...(seen.get(key) ?? []), transaction]);
+            });
+
+        return Array.from(seen.values()).filter((group) => group.length > 1).slice(0, 3);
+    }, [transactions]);
+
+    const subscriptionHints = useMemo(() => {
+        const groups = new Map<string, Transaction[]>();
+        transactions
+            .filter((transaction) => transaction.type === "expense")
+            .forEach((transaction) => {
+                const title = normalize(transaction.title);
+                const looksRecurring = ["subscription", "netflix", "spotify", "internet", "prime", "youtube", "apple"]
+                    .some((keyword) => title.includes(keyword));
+                if (looksRecurring || transaction.category === "Subscriptions" || transaction.category === "Bills") {
+                    groups.set(title, [...(groups.get(title) ?? []), transaction]);
+                }
+            });
+
+        return Array.from(groups.values())
+            .filter((group) => group.length >= 1)
+            .sort((a, b) => b.length - a.length)
+            .slice(0, 4);
+    }, [transactions]);
+
+    const categorySuggestions = useMemo(() => (
+        transactions
+            .filter((transaction) => transaction.type === "expense" && (!transaction.category || transaction.category === "Other"))
+            .slice(-5)
+            .map((transaction) => ({
+                transaction,
+                suggestion: guessCategory(transaction.title)
+            }))
+            .filter(({ suggestion }) => suggestion !== "Other")
+    ), [transactions]);
+
+    const budgetSuggestions = useMemo(() => {
+        const monthlyByCategory = new Map<string, number[]>();
+        transactions
+            .filter((transaction) => transaction.type === "expense" && transaction.category)
+            .forEach((transaction) => {
+                const date = new Date(transaction.date);
+                const key = `${date.getFullYear()}-${date.getMonth() + 1}`;
+                const categoryKey = `${transaction.category}|${key}`;
+                const current = monthlyByCategory.get(categoryKey)?.[0] ?? 0;
+                monthlyByCategory.set(categoryKey, [current + transaction.amount]);
+            });
+
+        const categoryTotals = new Map<string, number[]>();
+        monthlyByCategory.forEach((totals, key) => {
+            const category = key.split("|")[0];
+            categoryTotals.set(category, [...(categoryTotals.get(category) ?? []), totals[0]]);
+        });
+
+        return Array.from(categoryTotals.entries())
+            .map(([category, totals]) => ({
+                category,
+                amount: Math.ceil((totals.reduce((sum, value) => sum + value, 0) / totals.length) * 1.05)
+            }))
+            .sort((a, b) => b.amount - a.amount)
+            .slice(0, 4);
+    }, [transactions]);
+
+    const [coachQuestion, setCoachQuestion] = useState("");
+    const [coachAnswer, setCoachAnswer] = useState("Ask about spending, budgets, subscriptions, forecasts, goals, or categories. This assistant works offline.");
+
+    const generateAiInsight = async () => {
+        setAiLoading(true);
+        setAiError("");
+
+        try {
+            const response = await api.post<AiInsight>("/api/ai/insights");
+            setAiInsight(response.data);
+        } catch (error: unknown) {
+            console.error("Error generating AI insight:", error);
+            setAiError("AI insight could not be generated right now.");
+        } finally {
+            setAiLoading(false);
+        }
+    };
+
+    const answerOfflineQuestion = (question: string) => {
+        const text = normalize(question);
+        const topCategory = pieData.slice().sort((a, b) => b.value - a.value)[0];
+
+        if (!text) {
+            return "Type a finance question first. I can answer offline without touching your data plan.";
+        }
+
+        if (text.includes("forecast") || text.includes("end") || text.includes("month")) {
+            return `Offline forecast: you have spent ${formatCurrency(currentMonthExpenses)} this month. At this pace, expenses may land around ${formatCurrency(projectedMonthExpenses)}, leaving an estimated balance of ${formatCurrency(Math.abs(projectedBalance))}${projectedBalance >= 0 ? "." : " short."}`;
+        }
+
+        if (text.includes("cut") || text.includes("reduce") || text.includes("save")) {
+            return topCategory
+                ? `Start with ${topCategory.name}. A 20% reduction there would free about ${formatCurrency(topCategory.value * 0.2)} based on recorded spending.`
+                : "Add a few categorized expenses first, then I can show the easiest category to cut.";
+        }
+
+        if (text.includes("budget")) {
+            return budgetSuggestions.length > 0
+                ? `Suggested next budgets: ${budgetSuggestions.map((item) => `${item.category} ${formatCurrency(item.amount)}`).join(", ")}. These are calculated locally from your past category totals.`
+                : "I need categorized expenses before I can suggest reliable budgets.";
+        }
+
+        if (text.includes("subscription") || text.includes("recurring")) {
+            return subscriptionHints.length > 0
+                ? `Possible recurring charges: ${subscriptionHints.map((group) => `${group[0].title} (${formatCurrency(group[0].amount)})`).join(", ")}.`
+                : "I did not find obvious subscriptions yet. Label subscriptions or bills to improve detection.";
+        }
+
+        if (text.includes("duplicate") || text.includes("double")) {
+            return duplicateCharges.length > 0
+                ? `Possible duplicates: ${duplicateCharges.map((group) => `${group[0].title} on ${group[0].date}`).join(", ")}.`
+                : "No same-day duplicate charges found offline.";
+        }
+
+        if (text.includes("goal")) {
+            const nextGoal = goals.find((goal) => goal.targetAmount > goal.currentAmount);
+            return nextGoal
+                ? `${nextGoal.title} needs ${formatCurrency(nextGoal.targetAmount - nextGoal.currentAmount)} more. Your current balance is ${formatCurrency(Math.abs(balance))}${balance >= 0 ? ", so consider moving a fixed amount after each income entry." : ", so stabilize cash flow before adding more."}`
+                : "Add a savings goal and I can calculate the remaining amount and monthly pace.";
+        }
+
+        if (text.includes("category") || text.includes("categor")) {
+            return categorySuggestions.length > 0
+                ? `Category ideas: ${categorySuggestions.map(({ transaction, suggestion }) => `${transaction.title} -> ${suggestion}`).join(", ")}.`
+                : topCategory
+                    ? `${topCategory.name} is currently your largest expense category.`
+                    : "No category suggestions yet.";
+        }
+
+        return topCategory
+            ? `Quick offline read: balance is ${formatCurrency(Math.abs(balance))}${balance >= 0 ? "" : " short"}, top spending is ${topCategory.name}, and projected monthly expenses are ${formatCurrency(projectedMonthExpenses)}.`
+            : `Quick offline read: balance is ${formatCurrency(Math.abs(balance))}. Add categorized transactions for sharper answers.`;
+    };
+
+    const handleCoachSubmit = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        setCoachAnswer(answerOfflineQuestion(coachQuestion));
+    };
+
+    const handleOnlineQuestionSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const question = onlineQuestion.trim();
+        if (!question) {
+            setOnlineAnswer("Ask a question first.");
+            return;
+        }
+
+        setOnlineQuestionLoading(true);
+        setAiError("");
+
+        try {
+            const response = await api.post<AiQuestionResponse>("/api/ai/ask", { question });
+            setOnlineAnswer(response.data.answer);
+        } catch (error: unknown) {
+            console.error("Error asking online AI:", error);
+            setAiError("Online AI could not answer right now.");
+        } finally {
+            setOnlineQuestionLoading(false);
+        }
+    };
+
+    const toneClasses: Record<SmartInsight["tone"], string> = {
+        blue: "border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-100",
+        emerald: "border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-100",
+        amber: "border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-100",
+        rose: "border-rose-200 bg-rose-50 text-rose-900 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-100",
+        slate: "border-slate-200 bg-slate-50 text-slate-900 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-100"
+    };
 
     return (
         <div className="min-h-screen lg:flex">
@@ -200,6 +529,26 @@ function Sidebar({ transactions, darkMode, setDarkMode, username, devError, onLo
                                     </p>
                                 </div>
                             </div>
+
+                            <div className="mt-3 rounded-2xl bg-white/10 p-3 text-sm">
+                                <p className="text-white/50">Monthly budgets</p>
+                                <p className="mt-1 font-semibold text-blue-200">
+                                    {currentBudgets.length} active
+                                </p>
+                                <p className="mt-1 text-xs text-white/60">
+                                    {formatCurrency(currentBudgetSpent)} spent of {formatCurrency(currentBudgetLimit)}
+                                </p>
+                            </div>
+
+                            <div className="mt-3 rounded-2xl bg-white/10 p-3 text-sm">
+                                <p className="text-white/50">Savings goals</p>
+                                <p className="mt-1 font-semibold text-amber-200">
+                                    {goals.length} active
+                                </p>
+                                <p className="mt-1 text-xs text-white/60">
+                                    {formatCurrency(totalGoalSaved)} saved of {formatCurrency(totalGoalTarget)}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -278,6 +627,190 @@ function Sidebar({ transactions, darkMode, setDarkMode, username, devError, onLo
                                         </p>
                                     </div>
                                     <MdTrendingDown className="text-3xl text-rose-600 dark:text-rose-300" />
+                                </div>
+                            </div>
+                        </section>
+
+                        <section className="card border-l-4 border-l-cyan-500 p-6">
+                            <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+                                <div className="max-w-4xl">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-100 text-cyan-700 dark:bg-cyan-500/10 dark:text-cyan-300">
+                                            <LuBrainCircuit className="text-xl" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-700 dark:text-cyan-300">
+                                                Offline smart coach
+                                            </p>
+                                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                                                Ask Spark without using internet
+                                            </h3>
+                                        </div>
+                                    </div>
+
+                                    <form onSubmit={handleCoachSubmit} className="mt-5 flex flex-col gap-3 sm:flex-row">
+                                        <input
+                                            value={coachQuestion}
+                                            onChange={(event) => setCoachQuestion(event.target.value)}
+                                            className="input-field min-h-12"
+                                            placeholder="Ask: forecast this month, what can I cut, any duplicates..."
+                                        />
+                                        <button className="btn-primary w-full px-5 py-3 text-sm sm:w-auto">
+                                            <LuSend />
+                                            Ask
+                                        </button>
+                                    </form>
+
+                                    <div className="mt-4 rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm leading-6 text-cyan-950 dark:border-cyan-500/20 dark:bg-cyan-500/10 dark:text-cyan-100">
+                                        {coachAnswer}
+                                    </div>
+                                </div>
+
+                                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-100">
+                                    <div className="flex items-center gap-2">
+                                        <LuWifiOff />
+                                        Data saver on
+                                    </div>
+                                    <p className="mt-2 text-xs font-normal leading-5">
+                                        Local answers use data already loaded in Spark.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+                                {smartInsights.map((insight) => (
+                                    <div key={insight.title} className={`rounded-2xl border p-4 ${toneClasses[insight.tone]}`}>
+                                        <p className="text-xs font-semibold uppercase tracking-[0.18em] opacity-70">
+                                            {insight.title}
+                                        </p>
+                                        <p className="mt-2 text-xl font-black">
+                                            {insight.value}
+                                        </p>
+                                        <p className="mt-2 text-sm leading-5 opacity-80">
+                                            {insight.detail}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="mt-6 grid gap-4 lg:grid-cols-2">
+                                <div className="rounded-2xl border border-slate-200 bg-white/70 p-4 dark:border-slate-700 dark:bg-slate-900/40">
+                                    <div className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
+                                        <LuTriangleAlert className="text-amber-500" />
+                                        Smart alerts
+                                    </div>
+                                    <div className="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                                        {duplicateCharges.length > 0 ? (
+                                            duplicateCharges.map((group) => (
+                                                <p key={`${group[0].title}-${group[0].date}`}>
+                                                    Possible duplicate: {group[0].title} for {formatCurrency(group[0].amount)} on {group[0].date}.
+                                                </p>
+                                            ))
+                                        ) : (
+                                            <p>No duplicate same-day charges found.</p>
+                                        )}
+                                        {subscriptionHints.length > 0 ? (
+                                            <p>
+                                                Recurring watch: {subscriptionHints.map((group) => group[0].title).join(", ")}.
+                                            </p>
+                                        ) : (
+                                            <p>No obvious subscriptions found yet.</p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="rounded-2xl border border-slate-200 bg-white/70 p-4 dark:border-slate-700 dark:bg-slate-900/40">
+                                    <div className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
+                                        <LuBadgeCheck className="text-emerald-500" />
+                                        Offline recommendations
+                                    </div>
+                                    <div className="mt-3 grid gap-2 text-sm text-slate-600 dark:text-slate-300 sm:grid-cols-2">
+                                        <div>
+                                            <p className="font-semibold text-slate-900 dark:text-white">Budget ideas</p>
+                                            {budgetSuggestions.length > 0 ? (
+                                                budgetSuggestions.map((item) => (
+                                                    <p key={item.category}>{item.category}: {formatCurrency(item.amount)}</p>
+                                                ))
+                                            ) : (
+                                                <p>Add categorized expenses for suggestions.</p>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <p className="font-semibold text-slate-900 dark:text-white">Category ideas</p>
+                                            {categorySuggestions.length > 0 ? (
+                                                categorySuggestions.map(({ transaction, suggestion }) => (
+                                                    <p key={transaction.id}>{transaction.title}: {suggestion}</p>
+                                                ))
+                                            ) : (
+                                                <p>No uncategorized matches right now.</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mt-6 rounded-2xl border border-violet-200 bg-violet-50 p-4 dark:border-violet-500/20 dark:bg-violet-500/10">
+                                <div className="flex flex-col gap-4">
+                                    <div className="text-sm leading-6 text-violet-950 dark:text-violet-100">
+                                        <div className="flex items-center gap-2 font-bold">
+                                            <LuSparkles />
+                                            Optional online coach
+                                        </div>
+                                        {aiLoading ? (
+                                            <p className="mt-2">Reviewing your latest finance data online...</p>
+                                        ) : aiInsight ? (
+                                            <div className="mt-2 space-y-3">
+                                                <p>{aiInsight.summary}</p>
+                                                {aiInsight.actions.length > 0 && (
+                                                    <div className="grid gap-2 sm:grid-cols-3">
+                                                        {aiInsight.actions.map((action) => (
+                                                            <div
+                                                                key={action}
+                                                                className="rounded-2xl border border-violet-200 bg-white/70 px-4 py-3 text-sm font-medium dark:border-violet-500/20 dark:bg-slate-950/30"
+                                                            >
+                                                                {action}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ) : aiError ? (
+                                            <p className="mt-2 text-rose-600 dark:text-rose-300">{aiError}</p>
+                                        ) : (
+                                            <p className="mt-2">Use this only when you want a richer cloud AI explanation.</p>
+                                        )}
+                                    </div>
+
+                                    <form onSubmit={handleOnlineQuestionSubmit} className="grid gap-3 lg:grid-cols-[1fr_auto_auto]">
+                                        <input
+                                            value={onlineQuestion}
+                                            onChange={(event) => setOnlineQuestion(event.target.value)}
+                                            className="input-field min-h-12"
+                                            placeholder="Ask online AI: why did I overspend, what should I budget..."
+                                        />
+                                        <button
+                                            disabled={onlineQuestionLoading}
+                                            className="btn-primary w-full px-5 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-60 lg:w-auto"
+                                        >
+                                            <LuSend />
+                                            {onlineQuestionLoading ? "Asking..." : "Ask online"}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={generateAiInsight}
+                                            disabled={aiLoading}
+                                            className="btn-secondary w-full px-5 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-60 lg:w-auto"
+                                        >
+                                            <LuSparkles />
+                                            {aiLoading ? "Thinking..." : "Full insight"}
+                                        </button>
+                                    </form>
+
+                                    {onlineAnswer && (
+                                        <div className="rounded-2xl border border-violet-200 bg-white/70 px-4 py-3 text-sm leading-6 text-violet-950 dark:border-violet-500/20 dark:bg-slate-950/30 dark:text-violet-100">
+                                            {onlineAnswer}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </section>
@@ -428,7 +961,7 @@ function Sidebar({ transactions, darkMode, setDarkMode, username, devError, onLo
                                                         {t.title}
                                                     </p>
                                                     <p className="text-sm text-slate-500 dark:text-slate-400">
-                                                        {t.category ? `${t.category} • ` : ""}
+                                                        {t.category ? `${t.category} | ` : ""}
                                                         {t.date}
                                                     </p>
                                                 </div>

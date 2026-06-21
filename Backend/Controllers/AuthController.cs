@@ -45,7 +45,13 @@ public class AuthController : ControllerBase
         if (result.Succeeded)
         {
             Console.WriteLine("User registered successfully");
-            return Ok(new { message = "User registered successfully" });
+            var token = GenerateJwtToken(user);
+            return Ok(new
+            {
+                token,
+                username = user.UserName ?? user.Email ?? model.Username,
+                message = "User registered successfully"
+            });
         }
         
         var errors = result.Errors.Select(e => e.Description).ToList();
@@ -77,7 +83,11 @@ public class AuthController : ControllerBase
         {
             var token = GenerateJwtToken(user);
             Console.WriteLine("Login successful");
-            return Ok(new { token });
+            return Ok(new
+            {
+                token,
+                username = user.UserName ?? user.Email ?? loginIdentifier,
+            });
         }
         Console.WriteLine("Login failed: Invalid credentials");
         return Unauthorized(new { message = "Invalid username or password" });

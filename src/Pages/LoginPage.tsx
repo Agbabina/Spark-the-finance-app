@@ -66,7 +66,7 @@ function LoginPage({ setIsLoggedIn, setUsername }: Props) {
         <div className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
             <div className="mx-auto grid min-h-[calc(100vh-3rem)] max-w-6xl items-center gap-8 lg:grid-cols-[1.1fr_0.9fr]">
                 <section
-                    className="relative overflow-hidden rounded-[2rem] p-8 text-white shadow-2xl sm:p-10"
+                    className="relative overflow-hidden rounded-4xl p-8 text-white shadow-2xl sm:p-10"
                     style={{
                         background:
                             "linear-gradient(135deg, rgba(15,23,42,0.98) 0%, rgba(37,99,235,0.92) 55%, rgba(124,58,237,0.92) 100%)"
@@ -104,7 +104,7 @@ function LoginPage({ setIsLoggedIn, setUsername }: Props) {
                     </div>
                 </section>
 
-                <section className="surface rounded-[2rem] p-6 sm:p-8">
+                <section className="surface rounded-4xl p-6 sm:p-8">
                     <div className="flex items-start justify-between gap-4">
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-600 dark:text-blue-400">

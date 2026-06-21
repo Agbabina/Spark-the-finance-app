@@ -9,6 +9,8 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
+
 builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -51,6 +53,9 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddScoped<TransactionService>();
+builder.Services.AddScoped<BudgetService>();
+builder.Services.AddScoped<GoalService>();
+builder.Services.AddHttpClient<AiInsightService>();
 
 builder.Services.AddCors(
     options =>
@@ -71,6 +76,8 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.EnsureCreated();
     EnsureTransactionUserIdColumn(db);
+    EnsureBudgetTable(db);
+    EnsureGoalTable(db);
 }
 
 app.UseCors("AllowReact");
@@ -116,6 +123,76 @@ static void EnsureTransactionUserIdColumn(AppDbContext db)
             alterCommand.CommandText = "ALTER TABLE Transactions ADD COLUMN UserId TEXT NOT NULL DEFAULT '';";
             alterCommand.ExecuteNonQuery();
         }
+    }
+    finally
+    {
+        if (shouldClose)
+        {
+            connection.Close();
+        }
+    }
+}
+
+static void EnsureBudgetTable(AppDbContext db)
+{
+    var connection = db.Database.GetDbConnection();
+    var shouldClose = connection.State != System.Data.ConnectionState.Open;
+
+    if (shouldClose)
+    {
+        connection.Open();
+    }
+
+    try
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            CREATE TABLE IF NOT EXISTS Budgets (
+                Id INTEGER NOT NULL CONSTRAINT PK_Budgets PRIMARY KEY AUTOINCREMENT,
+                UserId TEXT NOT NULL,
+                Category TEXT NOT NULL,
+                [Limit] REAL NOT NULL,
+                Month INTEGER NOT NULL,
+                Year INTEGER NOT NULL,
+                CONSTRAINT FK_Budgets_AspNetUsers_UserId FOREIGN KEY (UserId) REFERENCES AspNetUsers (Id) ON DELETE CASCADE
+            );
+            """;
+        command.ExecuteNonQuery();
+    }
+    finally
+    {
+        if (shouldClose)
+        {
+            connection.Close();
+        }
+    }
+}
+
+static void EnsureGoalTable(AppDbContext db)
+{
+    var connection = db.Database.GetDbConnection();
+    var shouldClose = connection.State != System.Data.ConnectionState.Open;
+
+    if (shouldClose)
+    {
+        connection.Open();
+    }
+
+    try
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            CREATE TABLE IF NOT EXISTS Goals (
+                Id INTEGER NOT NULL CONSTRAINT PK_Goals PRIMARY KEY AUTOINCREMENT,
+                UserId TEXT NOT NULL,
+                Title TEXT NOT NULL,
+                TargetAmount REAL NOT NULL,
+                CurrentAmount REAL NOT NULL,
+                TargetDate TEXT NULL,
+                CONSTRAINT FK_Goals_AspNetUsers_UserId FOREIGN KEY (UserId) REFERENCES AspNetUsers (Id) ON DELETE CASCADE
+            );
+            """;
+        command.ExecuteNonQuery();
     }
     finally
     {

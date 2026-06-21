@@ -104,7 +104,7 @@ namespace Backend.Controllers
                 {
                     Console.WriteLine($"Inner exception: {ex.InnerException}");
                 }
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, "Internal server error(It's Really Bad)");
             }
         }
 

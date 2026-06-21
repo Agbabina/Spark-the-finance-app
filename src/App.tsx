@@ -5,13 +5,17 @@ import "./index.css";
 import Sidebar from "./Components/Sidebar.tsx";
 import AddTransaction from "./Pages/AddTransaction";
 import Transactions from "./Pages/Transactions";
+import Budgets from "./Pages/Budgets";
+import Goals from "./Pages/Goals";
 import LoginPage from "./Pages/LoginPage";
 import "./App.css"
-import type {Transaction} from "./types";
+import type {Budget, Goal, Transaction} from "./types";
 import { api, setApiAuthToken } from "./lib/api";
 
 function App() {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [budgets, setBudgets] = useState<Budget[]>([]);
+    const [goals, setGoals] = useState<Goal[]>([]);
     const [darkMode, setDarkMode] = useState<boolean>(false);
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
     const [username, setUsername] = useState<string>("");
@@ -66,7 +70,7 @@ function App() {
 
     useEffect(() => {
         if (isLoggedIn) {
-            fetchTransactions();
+            void fetchAppData();
         }
     }, [isLoggedIn]);
 
@@ -82,6 +86,34 @@ function App() {
         }
     };
 
+    const fetchBudgets = async () => {
+        try {
+            const response = await api.get("/api/budgets");
+            setBudgets(response.data);
+            setGlobalError("");
+        } catch (error: unknown) {
+            console.error("Error fetching budgets:", error);
+            const message = error instanceof Error ? error.message : "Failed to fetch budgets";
+            setGlobalError(message);
+        }
+    };
+
+    const fetchGoals = async () => {
+        try {
+            const response = await api.get("/api/goals");
+            setGoals(response.data);
+            setGlobalError("");
+        } catch (error: unknown) {
+            console.error("Error fetching goals:", error);
+            const message = error instanceof Error ? error.message : "Failed to fetch goals";
+            setGlobalError(message);
+        }
+    };
+
+    const fetchAppData = async () => {
+        await Promise.all([fetchTransactions(), fetchBudgets(), fetchGoals()]);
+    };
+
     return (
         <div className={`${darkMode ? "dark" : ""} app-shell`}>
             <BrowserRouter>
@@ -89,27 +121,25 @@ function App() {
                     <Route
                         path="/login"
                         element={
-                            isLoggedIn ? (
-                                <Navigate to="/" replace />
-                            ) : (
-                                <LoginPage setIsLoggedIn={setIsLoggedIn} setUsername={setUsername} />
-                            )
+                            <LoginPage setIsLoggedIn={setIsLoggedIn} setUsername={setUsername} />
                         }
                     />
                     <Route
                         path="/"
                         element={
-                            isLoggedIn ? (
+                            !isLoggedIn ? (
+                                <Navigate to="/login" replace />
+                            ) : (
                                 <Sidebar
                                     transactions={transactions}
+                                    budgets={budgets}
+                                    goals={goals}
                                     darkMode={darkMode}
                                     setDarkMode={setDarkMode}
                                     username={username}
                                     devError={globalError}
                                     onLogout={logout}
                                 />
-                            ) : (
-                                <LoginPage setIsLoggedIn={setIsLoggedIn} setUsername={setUsername} />
                             )
                         }
                     />
@@ -134,6 +164,37 @@ function App() {
                             isLoggedIn ? (
                                 <Transactions
                                     transactions={transactions}
+                                    username={username}
+                                />
+                            ) : (
+                                <Navigate to="/login" replace />
+                            )
+                        }
+                    />
+                    <Route
+                        path="/budgets"
+                        element={
+                            isLoggedIn ? (
+                                <Budgets
+                                    budgets={budgets}
+                                    transactions={transactions}
+                                    username={username}
+                                    setBudgets={setBudgets}
+                                    setGlobalError={setGlobalError}
+                                />
+                            ) : (
+                                <Navigate to="/login" replace />
+                            )
+                        }
+                    />
+                    <Route
+                        path="/goals"
+                        element={
+                            isLoggedIn ? (
+                                <Goals
+                                    goals={goals}
+                                    setGoals={setGoals}
+                                    setGlobalError={setGlobalError}
                                     username={username}
                                 />
                             ) : (
