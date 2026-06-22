@@ -1,160 +1,89 @@
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { LuBarChart3, LuWallet, LuSparkles, LuLock, LuCreditCard, LuTrendingUp } from "react-icons/lu";
 
 function LandingPage() {
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const token = localStorage.getItem("token");
-        if (token) {
-            navigate("/", { replace: true });
-        }
-    }, [navigate]);
-
     const features = [
-        {
-            icon: LuWallet,
-            title: "Track every naira",
-            description: "Log income and expenses in seconds with clean, distraction-free forms."
-        },
-        {
-            icon: LuBarChart3,
-            title: "Budgets that breathe",
-            description: "Set monthly caps per category and see progress bars update in real time."
-        },
-        {
-            icon: LuSparkles,
-            title: "AI coach built in",
-            description: "Get offline forecasts, savings tips, and smart alerts without third-party logins."
-        },
-        {
-            icon: LuCreditCard,
-            title: "Connect accounts",
-            description: "Link bank accounts and share transactions with trusted contacts."
-        },
-        {
-            icon: LuLock,
-            title: "Private by default",
-            description: "JWT-based sessions keep your data locked to your device until you choose to share."
-        },
-        {
-            icon: LuTrendingUp,
-            title: "Goals with momentum",
-            description: "Set targets, track progress, and celebrate milestones as you reach them."
-        }
+        { icon: LuWallet, title: "Track every naira", description: "Log income and expenses in seconds with clean, distraction-free forms." },
+        { icon: LuBarChart3, title: "Budgets that breathe", description: "Set monthly caps per category and see progress bars update in real time." },
+        { icon: LuSparkles, title: "AI coach built in", description: "Get offline forecasts, savings tips, and smart alerts without third-party logins." },
+        { icon: LuCreditCard, title: "Connect accounts", description: "Link bank accounts and share transactions with trusted contacts." },
+        { icon: LuLock, title: "Private by default", description: "JWT-based sessions keep your data locked to your device until you choose to share." },
+        { icon: LuTrendingUp, title: "Goals with momentum", description: "Set targets, track progress, and celebrate milestones as you reach them." }
     ];
 
     return (
-        <div className="min-h-screen bg-slate-950 text-white">
-            <nav className="fixed top-0 z-50 w-full border-b border-white/10 bg-slate-950/80 backdrop-blur-xl">
-                <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center gap-2">
-                        <span className="text-xl font-black tracking-tight text-white">Spark</span>
-                        <span className="rounded-full bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">Finance</span>
+        <div style={{ minHeight: "100vh", background: "#020617", color: "#ffffff" }}>
+            <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, borderBottom: "1px solid rgba(255,255,255,0.1)", background: "rgba(2,6,23,0.8)", backdropFilter: "blur(12px)" }}>
+                <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span style={{ fontSize: "20px", fontWeight: 900, color: "#ffffff" }}>Spark</span>
+                        <span style={{ borderRadius: "9999px", background: "#2563eb", padding: "2px 8px", fontSize: "12px", fontWeight: 700, color: "#ffffff" }}>Finance</span>
                     </div>
-                    <button
-                        onClick={() => navigate("/login")}
-                        className="btn-primary w-auto px-5 py-2.5 text-sm"
-                    >
-                        Sign in
-                    </button>
+                    <button type="button" onClick={() => navigate("/login")} style={{ background: "linear-gradient(135deg, #2563eb, #7c3aed)", color: "#ffffff", border: "none", borderRadius: "16px", padding: "10px 20px", fontSize: "14px", fontWeight: 700, cursor: "pointer" }}>Sign in</button>
                 </div>
             </nav>
 
-            <section className="relative overflow-hidden pt-32 pb-20 sm:pt-40 sm:pb-28">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.25),transparent_32%)]" />
-                <div className="absolute -left-24 top-20 h-64 w-64 rounded-full bg-blue-500/20 blur-3xl" />
-                <div className="absolute -right-16 bottom-10 h-72 w-72 rounded-full bg-violet-500/20 blur-3xl" />
+            <section style={{ position: "relative", overflow: "hidden", paddingTop: "192px", paddingBottom: "80px" }}>
+                <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at top right, rgba(59,130,246,0.25), transparent 32%)" }} />
+                <div style={{ position: "absolute", left: "-96px", top: "80px", height: "256px", width: "256px", borderRadius: "9999px", background: "rgba(59,130,246,0.2)", filter: "blur(64px)" }} />
+                <div style={{ position: "absolute", right: "-64px", bottom: "40px", height: "288px", width: "288px", borderRadius: "9999px", background: "rgba(124,58,237,0.2)", filter: "blur(64px)" }} />
 
-                <div className="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-                    <p className="text-sm font-semibold uppercase tracking-[0.35em] text-blue-400">
-                        Personal finance, reimagined
-                    </p>
-                    <h1 className="mt-6 text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
-                        Track money with a{" "}
-                        <span className="bg-linear-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">
-                            calmer, sharper
-                        </span>{" "}
-                        dashboard.
+                <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 16px", textAlign: "center" }}>
+                    <p style={{ fontSize: "14px", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "#60a5fa" }}>Personal finance, reimagined</p>
+                    <h1 style={{ marginTop: "24px", fontSize: "clamp(36px, 5vw, 48px)", fontWeight: 900, lineHeight: 1.1 }}>
+                        Track money with a <span style={{ background: "linear-gradient(135deg, #60a5fa, #c084fc)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>calmer, sharper</span> dashboard.
                     </h1>
-                    <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
+                    <p style={{ margin: "24px auto 0", maxWidth: "672px", fontSize: "18px", lineHeight: 1.7, color: "#cbd5e1" }}>
                         Capture income, watch spending, and read your finances at a glance — no noise, no clutter, just clarity.
                     </p>
-                    <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                        <button
-                            onClick={() => navigate("/login")}
-                            className="btn-primary w-auto px-8 py-3.5 text-base"
-                        >
-                            Get started free
-                        </button>
-                        <button
-                            onClick={() => navigate("/login")}
-                            className="btn-secondary w-auto px-8 py-3.5 text-base"
-                        >
-                            View demo
-                        </button>
+                    <div style={{ marginTop: "40px", display: "flex", flexDirection: "column", gap: "16px", alignItems: "center", justifyContent: "center" }}>
+                        <button type="button" onClick={() => navigate("/login")} style={{ background: "linear-gradient(135deg, #2563eb, #7c3aed)", color: "#ffffff", border: "none", borderRadius: "16px", padding: "14px 32px", fontSize: "16px", fontWeight: 700, cursor: "pointer", minWidth: "200px" }}>Get started free</button>
+                        <button type="button" onClick={() => navigate("/login")} style={{ background: "rgba(255,255,255,0.08)", color: "#e2e8f0", border: "1px solid rgba(255,255,255,0.12)", borderRadius: "16px", padding: "14px 32px", fontSize: "16px", fontWeight: 600, cursor: "pointer", minWidth: "200px" }}>View demo</button>
                     </div>
                 </div>
             </section>
 
-            <section className="border-y border-white/10 bg-slate-900/50 py-20">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <section style={{ borderTop: "1px solid rgba(255,255,255,0.1)", background: "rgba(15,23,42,0.5)", padding: "80px 0" }}>
+                <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 16px" }}>
+                    <div style={{ display: "grid", gap: "24px", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}>
                         {features.map((feature) => (
-                            <div
-                                key={feature.title}
-                                className="group rounded-3xl border border-white/10 bg-slate-900/80 p-6 transition hover:border-blue-500/40 hover:bg-slate-900"
-                            >
-                                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-400">
-                                    <feature.icon className="text-xl" />
+                            <div key={feature.title} style={{ borderRadius: "24px", border: "1px solid rgba(255,255,255,0.1)", background: "rgba(15,23,42,0.8)", padding: "24px", transition: "background 200ms ease" }}>
+                                <div style={{ display: "flex", height: "48px", width: "48px", alignItems: "center", justifyContent: "center", borderRadius: "16px", background: "rgba(59,130,246,0.1)", color: "#60a5fa" }}>
+                                    <feature.icon style={{ fontSize: "20px" }} />
                                 </div>
-                                <h3 className="mt-4 text-lg font-bold text-white">
-                                    {feature.title}
-                                </h3>
-                                <p className="mt-2 text-sm leading-6 text-slate-400">
-                                    {feature.description}
-                                </p>
+                                <h3 style={{ marginTop: "16px", fontSize: "18px", fontWeight: 700, color: "#ffffff" }}>{feature.title}</h3>
+                                <p style={{ marginTop: "8px", fontSize: "14px", lineHeight: 1.6, color: "#94a3b8" }}>{feature.description}</p>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            <section className="py-20">
-                <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-                    <h2 className="text-3xl font-black tracking-tight sm:text-4xl">
-                        Built for people who hate visual noise.
-                    </h2>
-                    <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-300">
+            <section style={{ padding: "80px 0" }}>
+                <div style={{ maxWidth: "896px", margin: "0 auto", padding: "0 16px", textAlign: "center" }}>
+                    <h2 style={{ fontSize: "clamp(30px, 4vw, 36px)", fontWeight: 900 }}>Built for people who hate visual noise.</h2>
+                    <p style={{ margin: "16px auto 0", maxWidth: "672px", fontSize: "18px", lineHeight: 1.7, color: "#cbd5e1" }}>
                         Most finance apps feel like a spreadsheet dressed in neon. Spark keeps the interface calm so you can focus on what matters: your money.
                     </p>
                 </div>
             </section>
 
-            <section className="border-t border-white/10 bg-slate-900/50 py-16">
-                <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-                    <h2 className="text-3xl font-black tracking-tight sm:text-4xl">
-                        Ready to take control?
-                    </h2>
-                    <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-300">
+            <section style={{ borderTop: "1px solid rgba(255,255,255,0.1)", background: "rgba(15,23,42,0.5)", padding: "64px 0" }}>
+                <div style={{ maxWidth: "896px", margin: "0 auto", padding: "0 16px", textAlign: "center" }}>
+                    <h2 style={{ fontSize: "clamp(30px, 4vw, 36px)", fontWeight: 900 }}>Ready to take control?</h2>
+                    <p style={{ margin: "16px auto 0", maxWidth: "672px", fontSize: "18px", lineHeight: 1.7, color: "#cbd5e1" }}>
                         Join thousands who have already simplified their finances with Spark.
                     </p>
-                    <button
-                        onClick={() => navigate("/login")}
-                        className="btn-primary mt-8 w-auto px-10 py-4 text-base"
-                    >
-                        Start tracking now
-                    </button>
+                    <button type="button" onClick={() => navigate("/login")} style={{ marginTop: "32px", background: "linear-gradient(135deg, #2563eb, #7c3aed)", color: "#ffffff", border: "none", borderRadius: "16px", padding: "16px 40px", fontSize: "16px", fontWeight: 700, cursor: "pointer" }}>Start tracking now</button>
                 </div>
             </section>
 
-            <footer className="border-t border-white/10 py-10">
-                <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 sm:flex-row sm:px-6 lg:px-8">
-                    <p className="text-sm text-slate-500">
-                        Spark Finance. All rights reserved.
-                    </p>
-                    <div className="flex gap-6 text-sm text-slate-500">
+            <footer style={{ borderTop: "1px solid rgba(255,255,255,0.1)", padding: "40px 0" }}>
+                <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 16px", display: "flex", flexDirection: "column", gap: "16px", alignItems: "center", justifyContent: "space-between" }}>
+                    <p style={{ fontSize: "14px", color: "#64748b" }}>Spark Finance. All rights reserved.</p>
+                    <div style={{ display: "flex", gap: "24px", fontSize: "14px", color: "#64748b" }}>
                         <span>Privacy</span>
                         <span>Terms</span>
                         <span>Contact</span>
