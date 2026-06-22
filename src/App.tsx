@@ -10,6 +10,7 @@ import Goals from "./Pages/Goals";
 import LoginPage from "./Pages/LoginPage";
 import SparkConnect from "./Pages/SparkConnect";
 import Connections from "./Pages/Connections";
+import LandingPage from "./Pages/LandingPage";
 import "./App.css"
 import type {Budget, Goal, Transaction} from "./types";
 import { api, setApiAuthToken } from "./lib/api";
@@ -129,9 +130,7 @@ function App() {
                     <Route
                         path="/"
                         element={
-                            !isLoggedIn ? (
-                                <Navigate to="/login" replace />
-                            ) : (
+                            isLoggedIn ? (
                                 <Sidebar
                                     transactions={transactions}
                                     budgets={budgets}
@@ -142,6 +141,8 @@ function App() {
                                     devError={globalError}
                                     onLogout={logout}
                                 />
+                            ) : (
+                                <LandingPage />
                             )
                         }
                     />

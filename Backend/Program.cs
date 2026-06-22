@@ -28,7 +28,7 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(options =>
@@ -50,6 +50,16 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtAudience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
     };
+})
+.AddCookie("External")
+.AddGoogle("Google", options =>
+{
+    options.SignInScheme = "External";
+    options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? string.Empty;
+    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
+    options.SaveTokens = true;
+    options.Scope.Add("profile");
+    options.Scope.Add("email");
 });
 
 builder.Services.AddScoped<TransactionService>();
