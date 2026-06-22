@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 import "./index.css";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import Sidebar from "./Components/Sidebar.tsx";
 import AddTransaction from "./Pages/AddTransaction";
 import Transactions from "./Pages/Transactions";
@@ -19,7 +20,10 @@ function App() {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [budgets, setBudgets] = useState<Budget[]>([]);
     const [goals, setGoals] = useState<Goal[]>([]);
-    const [darkMode, setDarkMode] = useState<boolean>(false);
+    const [darkMode, setDarkMode] = useState<boolean>(() => {
+        const saved = localStorage.getItem("theme");
+        return saved !== "light";
+    });
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
     const [username, setUsername] = useState<string>("");
     const [globalError, setGlobalError] = useState<string>("");
@@ -77,6 +81,10 @@ function App() {
         }
     }, [isLoggedIn]);
 
+    useEffect(() => {
+        localStorage.setItem("theme", darkMode ? "dark" : "light");
+    }, [darkMode]);
+
     const fetchTransactions = async () => {
         try {
             const response = await api.get('/api/transactions');
@@ -118,66 +126,77 @@ function App() {
     };
 
     return (
-        <div className={`${darkMode ? "dark" : ""} app-shell`}>
+        <ThemeProvider>
             <BrowserRouter>
                 <Routes>
                     <Route
-                        path="/login"
-                        element={
-                            <LoginPage setIsLoggedIn={setIsLoggedIn} setUsername={setUsername} />
-                        }
+                        path="/landing"
+                        element={<LandingPage />}
                     />
                     <Route
                         path="/"
                         element={
                             isLoggedIn ? (
-                                <Sidebar
-                                    transactions={transactions}
-                                    budgets={budgets}
-                                    goals={goals}
-                                    darkMode={darkMode}
-                                    setDarkMode={setDarkMode}
-                                    username={username}
-                                    devError={globalError}
-                                    onLogout={logout}
-                                />
+                                <div className={`${darkMode ? "dark" : ""} app-shell`}>
+                                    <Sidebar
+                                        transactions={transactions}
+                                        budgets={budgets}
+                                        goals={goals}
+                                        darkMode={darkMode}
+                                        setDarkMode={setDarkMode}
+                                        username={username}
+                                        devError={globalError}
+                                        onLogout={logout}
+                                    />
+                                </div>
                             ) : (
                                 <LandingPage />
                             )
                         }
                     />
-                    <Route
-                        path="/add"
-                        element={
-                            isLoggedIn ? (
+                <Route
+                    path="/login"
+                    element={
+                        <LoginPage setIsLoggedIn={setIsLoggedIn} setUsername={setUsername} />
+                    }
+                />
+                <Route
+                    path="/add"
+                    element={
+                        isLoggedIn ? (
+                            <div className={`${darkMode ? "dark" : ""} app-shell`}>
                                 <AddTransaction
                                     setTransactions={setTransactions}
                                     darkMode={darkMode}
                                     username={username}
                                     setGlobalError={setGlobalError}
                                 />
-                            ) : (
-                                <Navigate to="/" replace />
-                            )
-                        }
-                    />
-                    <Route
-                        path="/transactions"
-                        element={
-                            isLoggedIn ? (
+                            </div>
+                        ) : (
+                            <Navigate to="/" replace />
+                        )
+                    }
+                />
+                <Route
+                    path="/transactions"
+                    element={
+                        isLoggedIn ? (
+                            <div className={`${darkMode ? "dark" : ""} app-shell`}>
                                 <Transactions
                                     transactions={transactions}
                                     username={username}
                                 />
-                            ) : (
-                                <Navigate to="/" replace />
-                            )
-                        }
-                    />
-                    <Route
-                        path="/budgets"
-                        element={
-                            isLoggedIn ? (
+                            </div>
+                        ) : (
+                            <Navigate to="/" replace />
+                        )
+                    }
+                />
+                <Route
+                    path="/budgets"
+                    element={
+                        isLoggedIn ? (
+                            <div className={`${darkMode ? "dark" : ""} app-shell`}>
                                 <Budgets
                                     budgets={budgets}
                                     transactions={transactions}
@@ -185,50 +204,56 @@ function App() {
                                     setBudgets={setBudgets}
                                     setGlobalError={setGlobalError}
                                 />
-                            ) : (
-                                <Navigate to="/" replace />
-                            )
-                        }
-                    />
-                    <Route
-                        path="/goals"
-                        element={
-                            isLoggedIn ? (
+                            </div>
+                        ) : (
+                            <Navigate to="/" replace />
+                        )
+                    }
+                />
+                <Route
+                    path="/goals"
+                    element={
+                        isLoggedIn ? (
+                            <div className={`${darkMode ? "dark" : ""} app-shell`}>
                                 <Goals
                                     goals={goals}
                                     setGoals={setGoals}
                                     setGlobalError={setGlobalError}
                                     username={username}
                                 />
-                            ) : (
-                                <Navigate to="/" replace />
-                            )
-                        }
-                    />
-                    <Route
-                        path="/spark-connect"
-                        element={
-                            isLoggedIn ? (
-                                <SparkConnect
-                                />
-                            ) : (
-                                <Navigate to="/" replace />
-                            )
-                        }
-                    />
-                    <Route
-                        path="/connections"
-                        element={
-                            isLoggedIn ? (
+                            </div>
+                        ) : (
+                            <Navigate to="/" replace />
+                        )
+                    }
+                />
+                <Route
+                    path="/spark-connect"
+                    element={
+                        isLoggedIn ? (
+                            <div className={`${darkMode ? "dark" : ""} app-shell`}>
+                                <SparkConnect />
+                            </div>
+                        ) : (
+                            <Navigate to="/" replace />
+                        )
+                    }
+                />
+                <Route
+                    path="/connections"
+                    element={
+                        isLoggedIn ? (
+                            <div className={`${darkMode ? "dark" : ""} app-shell`}>
                                 <Connections />
-                            ) : (
-                                <Navigate to="/" replace />
-                            )
-                        }
-                    />
-                </Routes>
+                            </div>
+                        ) : (
+                            <Navigate to="/" replace />
+                        )
+                    }
+                />
+            </Routes>
             </BrowserRouter>
-        </div>
+        </ThemeProvider>
     );
 }
 
