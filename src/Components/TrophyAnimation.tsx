@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 interface TrophyAnimationProps {
     goalTitle?: string | null;
     isOpen: boolean;

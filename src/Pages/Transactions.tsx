@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LuShare2 } from "react-icons/lu";
 import axios from "axios";
 
 import { api, setApiAuthToken } from "../lib/api";
-import type { Transaction } from "../types.ts";
+import type { Transaction } from "../types";
 
 interface Props {
     transactions: Transaction[];
@@ -18,14 +18,6 @@ type ShareState = {
     saving: boolean;
     error: string;
     success: boolean;
-};
-
-const emptyShareState: Omit<ShareState, "transactionId"> = {
-    connectedUsers: [],
-    selectedUserId: "",
-    saving: false,
-    error: "",
-    success: false,
 };
 
 function Transactions({ transactions, username }: Props) {
