@@ -2,7 +2,10 @@ using Backend.Models;
 using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Concurrent;
 using System.Security.Claims;
+using Fleck;
+using System.Text.Json;
 //  https://github.io/Spark-the-finance-app
 //On X, https://x.com/Agbabinathedev
 //Do not copy the first two slashes pls, it serves as code comments
@@ -15,10 +18,12 @@ namespace Backend.Controllers;
 public class BudgetController : ControllerBase
 {
     private readonly BudgetService _budgetService;
+    private readonly BudgetRoomService _roomService;
 
-    public BudgetController(BudgetService budgetService)
+    public BudgetController(BudgetService budgetService, BudgetRoomService roomService)
     {
         _budgetService = budgetService;
+        _roomService = roomService;
     }
 
     private string GetCurrentUserId()
@@ -174,4 +179,32 @@ public class BudgetController : ControllerBase
             return Unauthorized("Invalid token");
         }
     }
+
+    public void HandleIncomingMessage(string rawMessage, IWebSocketConnection sender)
+    {
+        try
+        {
+            var options = new JsonSerializerOptions {PropertyNameCaseInsensitive = true};
+            var messageData= JsonSerializer.Deserialize<TransactionMessage>(rawMessage, options);
+
+            if (messageData== null) return;
+
+            switch (messageData.Action.ToUpper())
+            {
+                case "ADD_TRANSACTION":
+                    Console.WriteLine($"Processing {messageData.Amount} for category {messageData.Category}");
+                    _roomService.BroadcastToPartners(messageData.BudgetId, rawMessage, sender);
+                    break;
+                default:
+                    Console.WriteLine($"Unknown Action: {messageData.Action}");
+                    break;
+
+            }
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine($"Error Unexpected at: {ex.Message}");
+        }
+    }
+
 }

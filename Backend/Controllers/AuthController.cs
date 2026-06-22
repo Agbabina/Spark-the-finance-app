@@ -40,7 +40,7 @@ public class AuthController : ControllerBase
             return BadRequest(new { message = "Password must be at least 6 characters long" });
         }
 
-        var user = new User { UserName = model.Username, Email = model.Email };
+        var user = new User { UserName = model.Username, Email = model.Email};
         var result = await _userManager.CreateAsync(user, model.Password);
         if (result.Succeeded)
         {

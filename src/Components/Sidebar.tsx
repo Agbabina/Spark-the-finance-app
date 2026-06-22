@@ -1,5 +1,5 @@
 import { type FormEvent, useMemo, useState } from "react";
-import { LuBadgeCheck, LuBrainCircuit, LuMenu, LuSend, LuSparkles, LuTriangleAlert, LuWifiOff } from "react-icons/lu";
+import { LuBadgeCheck, LuBrainCircuit, LuMenu, LuSend, LuSparkles, LuTriangleAlert, LuWifiOff, LuUsers } from "react-icons/lu";
 import { MdBalance, MdTrendingDown, MdTrendingUp } from "react-icons/md";
 import { GrTransaction } from "react-icons/gr";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -86,6 +86,8 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
         { name: "Transactions", icon: GrTransaction, path: "/transactions" },
         { name: "Budgets", icon: MdAccountBalanceWallet, path: "/budgets" },
         { name: "Goals", icon: BsBullseye, path: "/goals" },
+        { name: "Spark Connect", icon: BiCreditCard, path: "/spark-connect" },
+        { name: "Connections", icon: LuUsers, path: "/connections" },
         { name: "Add Transaction", icon: BiPlus, path: "/add" }
     ];
 

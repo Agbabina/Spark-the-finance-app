@@ -1,5 +1,9 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { LuShare2 } from "react-icons/lu";
+import axios from "axios";
 
+import { api, setApiAuthToken } from "../lib/api";
 import type { Transaction } from "../types.ts";
 
 interface Props {
@@ -7,8 +11,27 @@ interface Props {
     username: string;
 }
 
+type ShareState = {
+    transactionId: number;
+    connectedUsers: Array<{ id: string; username: string }>;
+    selectedUserId: string;
+    saving: boolean;
+    error: string;
+    success: boolean;
+};
+
+const emptyShareState: Omit<ShareState, "transactionId"> = {
+    connectedUsers: [],
+    selectedUserId: "",
+    saving: false,
+    error: "",
+    success: false,
+};
+
 function Transactions({ transactions, username }: Props) {
     const navigate = useNavigate();
+    const [openShareId, setOpenShareId] = useState<number | null>(null);
+    const [shareState, setShareState] = useState<ShareState | null>(null);
 
     const totalIncome = transactions
         .filter(t => t.type === "income")
@@ -19,6 +42,88 @@ function Transactions({ transactions, username }: Props) {
         .reduce((sum, t) => sum + t.amount, 0);
 
     const balance = totalIncome - totalExpenses;
+
+    const openShare = async (transactionId: number) => {
+        setOpenShareId(transactionId);
+        setShareState(null);
+
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                navigate("/login");
+                return;
+            }
+            setApiAuthToken(token);
+
+            const response = await api.get("/api/connections/users");
+            setShareState({
+                transactionId,
+                connectedUsers: response.data,
+                selectedUserId: "",
+                saving: false,
+                error: "",
+                success: false,
+            });
+        } catch (error: unknown) {
+            let message = "Failed to load connections";
+            if (axios.isAxiosError(error)) {
+                message = error.response?.data?.message || error.response?.data || error.message || message;
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
+            setShareState({
+                transactionId,
+                connectedUsers: [],
+                selectedUserId: "",
+                saving: false,
+                error: message,
+                success: false,
+            });
+        }
+    };
+
+    const closeShare = () => {
+        setOpenShareId(null);
+        setShareState(null);
+    };
+
+    const handleShareSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!shareState || !shareState.selectedUserId) return;
+
+        setShareState((current) => current ? { ...current, saving: true, error: "" } : null);
+
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                navigate("/login");
+                return;
+            }
+            setApiAuthToken(token);
+
+            await api.post("/api/connections/share-transaction", {
+                transactionId: shareState.transactionId,
+                sharedWithUserId: shareState.selectedUserId,
+            });
+
+            setShareState((current) => current ? { ...current, saving: false, success: true, error: "" } : null);
+            setTimeout(closeShare, 600);
+        } catch (error: unknown) {
+            let message = "Failed to share transaction";
+            if (axios.isAxiosError(error)) {
+                message = error.response?.data?.message || error.response?.data || error.message || message;
+                if (axios.isAxiosError(error) && error.response?.status === 401) {
+                    localStorage.removeItem("token");
+                    setApiAuthToken(null);
+                    navigate("/login");
+                    return;
+                }
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
+            setShareState((current) => current ? { ...current, saving: false, error: message, success: false } : null);
+        }
+    };
 
     return (
         <div className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
@@ -96,18 +201,19 @@ function Transactions({ transactions, username }: Props) {
                         </div>
                     ) : (
                         <div className="overflow-hidden rounded-[1.75rem] border border-slate-200/70 dark:border-slate-700">
-                            <div className="hidden grid-cols-[1.5fr_0.8fr_0.8fr_0.7fr] gap-4 border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-400 md:grid">
+                            <div className="hidden grid-cols-[1.5fr_0.8fr_0.8fr_0.7fr_auto] gap-4 border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-400 md:grid">
                                 <span>Title</span>
                                 <span>Category</span>
                                 <span>Date</span>
                                 <span className="text-right">Amount</span>
+                                <span className="text-right">Share</span>
                             </div>
 
                             <div className="divide-y divide-slate-200 dark:divide-slate-700">
                                 {transactions.map((t) => (
                                     <div
                                         key={t.id}
-                                        className="grid gap-3 px-5 py-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-900/40 md:grid-cols-[1.5fr_0.8fr_0.8fr_0.7fr] md:items-center"
+                                        className="grid gap-3 px-5 py-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-900/40 md:grid-cols-[1.5fr_0.8fr_0.8fr_0.7fr_auto] md:items-center"
                                     >
                                         <div className="flex items-center gap-3">
                                             <div className={`flex h-11 w-11 items-center justify-center rounded-2xl font-bold ${t.type === "income" ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300" : "bg-rose-100 text-rose-600 dark:bg-rose-500/10 dark:text-rose-300"}`}>
@@ -134,6 +240,17 @@ function Transactions({ transactions, username }: Props) {
                                         <div className={`text-right text-base font-bold ${t.type === "income" ? "text-emerald-600 dark:text-emerald-300" : "text-rose-600 dark:text-rose-300"}`}>
                                             {t.type === "income" ? "+" : "-"}NGN {t.amount.toLocaleString()}
                                         </div>
+
+                                        <div className="text-right">
+                                            <button
+                                                type="button"
+                                                onClick={() => openShare(t.id)}
+                                                className="rounded-xl p-2 text-slate-400 transition hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-500/10 dark:hover:text-blue-400"
+                                                title="Share transaction"
+                                            >
+                                                <LuShare2 className="text-lg" />
+                                            </button>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -141,6 +258,67 @@ function Transactions({ transactions, username }: Props) {
                     )}
                 </section>
             </div>
+
+            {openShareId !== null && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={closeShare}>
+                    <div className="card w-full max-w-md p-6 sm:p-8" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                            Share transaction
+                        </h3>
+                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                            Choose a connected user to share this transaction with.
+                        </p>
+
+                        {shareState?.error && (
+                            <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200">
+                                {shareState.error}
+                            </div>
+                        )}
+
+                        {shareState?.success && (
+                            <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200">
+                                Shared successfully
+                            </div>
+                        )}
+
+                        {shareState && shareState.connectedUsers.length === 0 && !shareState.error ? (
+                            <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
+                                No connected users yet. Go to Connections to send a request first.
+                            </p>
+                        ) : (
+                            <form onSubmit={handleShareSubmit} className="mt-6 space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                                        Share with
+                                    </label>
+                                    <select
+                                        value={shareState?.selectedUserId ?? ""}
+                                        onChange={(e) => setShareState((current) => current ? { ...current, selectedUserId: e.target.value } : null)}
+                                        className="input-field"
+                                        required
+                                    >
+                                        <option value="">Select a user</option>
+                                        {shareState?.connectedUsers.map((user) => (
+                                            <option key={user.id} value={user.id}>
+                                                {user.username}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="flex gap-3">
+                                    <button type="submit" className="btn-primary" disabled={shareState?.saving}>
+                                        {shareState?.saving ? "Sharing..." : "Share"}
+                                    </button>
+                                    <button type="button" onClick={closeShare} className="btn-secondary">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

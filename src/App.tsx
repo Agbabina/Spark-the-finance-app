@@ -8,6 +8,8 @@ import Transactions from "./Pages/Transactions";
 import Budgets from "./Pages/Budgets";
 import Goals from "./Pages/Goals";
 import LoginPage from "./Pages/LoginPage";
+import SparkConnect from "./Pages/SparkConnect";
+import Connections from "./Pages/Connections";
 import "./App.css"
 import type {Budget, Goal, Transaction} from "./types";
 import { api, setApiAuthToken } from "./lib/api";
@@ -154,7 +156,7 @@ function App() {
                                     setGlobalError={setGlobalError}
                                 />
                             ) : (
-                                <Navigate to="/login" replace />
+                                <Navigate to="/" replace />
                             )
                         }
                     />
@@ -167,7 +169,7 @@ function App() {
                                     username={username}
                                 />
                             ) : (
-                                <Navigate to="/login" replace />
+                                <Navigate to="/" replace />
                             )
                         }
                     />
@@ -183,7 +185,7 @@ function App() {
                                     setGlobalError={setGlobalError}
                                 />
                             ) : (
-                                <Navigate to="/login" replace />
+                                <Navigate to="/" replace />
                             )
                         }
                     />
@@ -198,7 +200,28 @@ function App() {
                                     username={username}
                                 />
                             ) : (
-                                <Navigate to="/login" replace />
+                                <Navigate to="/" replace />
+                            )
+                        }
+                    />
+                    <Route
+                        path="/spark-connect"
+                        element={
+                            isLoggedIn ? (
+                                <SparkConnect
+                                />
+                            ) : (
+                                <Navigate to="/" replace />
+                            )
+                        }
+                    />
+                    <Route
+                        path="/connections"
+                        element={
+                            isLoggedIn ? (
+                                <Connections />
+                            ) : (
+                                <Navigate to="/" replace />
                             )
                         }
                     />

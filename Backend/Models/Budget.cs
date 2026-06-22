@@ -17,5 +17,7 @@ public class Budget
 
     public int Year { get; set; }
 
+    public bool IsShared { get; set; } = false;
+
     public User? User { get; set; }
 }

@@ -54,7 +54,10 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddScoped<TransactionService>();
 builder.Services.AddScoped<BudgetService>();
+builder.Services.AddScoped<BudgetRoomService>();
 builder.Services.AddScoped<GoalService>();
+builder.Services.AddScoped<AccountConnectionService>();
+builder.Services.AddScoped<ConnectionService>();
 builder.Services.AddHttpClient<AiInsightService>();
 
 builder.Services.AddCors(
@@ -78,6 +81,10 @@ using (var scope = app.Services.CreateScope())
     EnsureTransactionUserIdColumn(db);
     EnsureBudgetTable(db);
     EnsureGoalTable(db);
+    EnsureBankAccountTable(db);
+    EnsureBudgetIsSharedColumn(db);
+    EnsureConnectionRequestsTable(db);
+    EnsureSharedTransactionsTable(db);
 }
 
 app.UseCors("AllowReact");
@@ -168,37 +175,197 @@ static void EnsureBudgetTable(AppDbContext db)
     }
 }
 
-static void EnsureGoalTable(AppDbContext db)
-{
-    var connection = db.Database.GetDbConnection();
-    var shouldClose = connection.State != System.Data.ConnectionState.Open;
+    static void EnsureGoalTable(AppDbContext db)
+    {
+        var connection = db.Database.GetDbConnection();
+        var shouldClose = connection.State != System.Data.ConnectionState.Open;
 
-    if (shouldClose)
-    {
-        connection.Open();
-    }
-
-    try
-    {
-        using var command = connection.CreateCommand();
-        command.CommandText = """
-            CREATE TABLE IF NOT EXISTS Goals (
-                Id INTEGER NOT NULL CONSTRAINT PK_Goals PRIMARY KEY AUTOINCREMENT,
-                UserId TEXT NOT NULL,
-                Title TEXT NOT NULL,
-                TargetAmount REAL NOT NULL,
-                CurrentAmount REAL NOT NULL,
-                TargetDate TEXT NULL,
-                CONSTRAINT FK_Goals_AspNetUsers_UserId FOREIGN KEY (UserId) REFERENCES AspNetUsers (Id) ON DELETE CASCADE
-            );
-            """;
-        command.ExecuteNonQuery();
-    }
-    finally
-    {
         if (shouldClose)
         {
-            connection.Close();
+            connection.Open();
+        }
+
+        try
+        {
+            using var command = connection.CreateCommand();
+            command.CommandText = """
+                CREATE TABLE IF NOT EXISTS Goals (
+                    Id INTEGER NOT NULL CONSTRAINT PK_Goals PRIMARY KEY AUTOINCREMENT,
+                    UserId TEXT NOT NULL,
+                    Title TEXT NOT NULL,
+                    TargetAmount REAL NOT NULL,
+                    CurrentAmount REAL NOT NULL,
+                    TargetDate TEXT NULL,
+                    CONSTRAINT FK_Goals_AspNetUsers_UserId FOREIGN KEY (UserId) REFERENCES AspNetUsers (Id) ON DELETE CASCADE
+                );
+                """;
+            command.ExecuteNonQuery();
+        }
+        finally
+        {
+            if (shouldClose)
+            {
+                connection.Close();
+            }
         }
     }
-}
+
+    static void EnsureBankAccountTable(AppDbContext db)
+    {
+        var connection = db.Database.GetDbConnection();
+        var shouldClose = connection.State != System.Data.ConnectionState.Open;
+
+        if (shouldClose)
+        {
+            connection.Open();
+        }
+
+        try
+        {
+            using var command = connection.CreateCommand();
+            command.CommandText = """
+                CREATE TABLE IF NOT EXISTS BankAccounts (
+                    Id INTEGER NOT NULL CONSTRAINT PK_BankAccounts PRIMARY KEY AUTOINCREMENT,
+                    UserId TEXT NOT NULL,
+                    InstitutionName TEXT NOT NULL,
+                    AccountType TEXT NOT NULL,
+                    AccountName TEXT NOT NULL,
+                    LastFourDigits TEXT NOT NULL,
+                    Balance REAL NOT NULL,
+                    IsActive INTEGER NOT NULL,
+                    ConnectedAt TEXT NOT NULL,
+                    CONSTRAINT FK_BankAccounts_AspNetUsers_UserId FOREIGN KEY (UserId) REFERENCES AspNetUsers (Id) ON DELETE CASCADE
+                );
+                """;
+            command.ExecuteNonQuery();
+        }
+        finally
+        {
+            if (shouldClose)
+            {
+                connection.Close();
+            }
+        }
+    }
+
+    static void EnsureBudgetIsSharedColumn(AppDbContext db)
+    {
+        var connection = db.Database.GetDbConnection();
+        var shouldClose = connection.State != System.Data.ConnectionState.Open;
+
+        if (shouldClose)
+        {
+            connection.Open();
+        }
+
+        try
+        {
+            var hasIsSharedColumn = false;
+
+            using (var pragmaCommand = connection.CreateCommand())
+            {
+                pragmaCommand.CommandText = "PRAGMA table_info(Budgets);";
+                using var reader = pragmaCommand.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    var columnName = reader.GetString(1);
+                    if (string.Equals(columnName, "IsShared", StringComparison.OrdinalIgnoreCase))
+                    {
+                        hasIsSharedColumn = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!hasIsSharedColumn)
+            {
+                using var alterCommand = connection.CreateCommand();
+                alterCommand.CommandText = "ALTER TABLE Budgets ADD COLUMN IsShared INTEGER NOT NULL DEFAULT 0;";
+                alterCommand.ExecuteNonQuery();
+            }
+        }
+        finally
+        {
+            if (shouldClose)
+            {
+                connection.Close();
+            }
+        }
+    }
+
+    static void EnsureConnectionRequestsTable(AppDbContext db)
+    {
+        var connection = db.Database.GetDbConnection();
+        var shouldClose = connection.State != System.Data.ConnectionState.Open;
+
+        if (shouldClose)
+        {
+            connection.Open();
+        }
+
+        try
+        {
+            using var command = connection.CreateCommand();
+            command.CommandText = """
+                CREATE TABLE IF NOT EXISTS ConnectionRequests (
+                    Id INTEGER NOT NULL CONSTRAINT PK_ConnectionRequests PRIMARY KEY AUTOINCREMENT,
+                    RequesterId TEXT NOT NULL,
+                    ReceiverId TEXT NOT NULL,
+                    Status TEXT NOT NULL DEFAULT 'pending',
+                    CreatedAt TEXT NOT NULL,
+                    RespondedAt TEXT NULL,
+                    CONSTRAINT FK_ConnectionRequests_AspNetUsers_RequesterId FOREIGN KEY (RequesterId) REFERENCES AspNetUsers (Id) ON DELETE CASCADE,
+                    CONSTRAINT FK_ConnectionRequests_AspNetUsers_ReceiverId FOREIGN KEY (ReceiverId) REFERENCES AspNetUsers (Id) ON DELETE CASCADE
+                );
+                """;
+            command.ExecuteNonQuery();
+        }
+        finally
+        {
+            if (shouldClose)
+            {
+                connection.Close();
+            }
+        }
+    }
+
+    static void EnsureSharedTransactionsTable(AppDbContext db)
+    {
+        var connection = db.Database.GetDbConnection();
+        var shouldClose = connection.State != System.Data.ConnectionState.Open;
+
+        if (shouldClose)
+        {
+            connection.Open();
+        }
+
+        try
+        {
+            using var command = connection.CreateCommand();
+            command.CommandText = """
+                CREATE TABLE IF NOT EXISTS SharedTransactions (
+                    Id INTEGER NOT NULL CONSTRAINT PK_SharedTransactions PRIMARY KEY AUTOINCREMENT,
+                    OriginalTransactionId INTEGER NOT NULL,
+                    SharedByUserId TEXT NOT NULL,
+                    SharedWithUserId TEXT NOT NULL,
+                    Category TEXT NOT NULL,
+                    Amount REAL NOT NULL,
+                    Type TEXT NOT NULL,
+                    Date TEXT NOT NULL,
+                    Description TEXT NULL,
+                    CreatedAt TEXT NOT NULL,
+                    CONSTRAINT FK_SharedTransactions_AspNetUsers_SharedByUserId FOREIGN KEY (SharedByUserId) REFERENCES AspNetUsers (Id) ON DELETE CASCADE,
+                    CONSTRAINT FK_SharedTransactions_AspNetUsers_SharedWithUserId FOREIGN KEY (SharedWithUserId) REFERENCES AspNetUsers (Id) ON DELETE CASCADE
+                );
+                """;
+            command.ExecuteNonQuery();
+        }
+        finally
+        {
+            if (shouldClose)
+            {
+                connection.Close();
+            }
+        }
+    }

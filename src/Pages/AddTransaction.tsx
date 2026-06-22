@@ -145,6 +145,7 @@ function AddTransaction({ setTransactions, darkMode: _darkMode, username, setGlo
                     onSubmit={handleSubmit}
                     className="card p-6 sm:p-8"
                 >
+                    
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-600 dark:text-blue-400">

@@ -43,3 +43,39 @@ export interface AiTransactionDraft {
     note: string;
 }
 
+export interface BankAccount {
+    id: number;
+    userId: string;
+    institutionName: string;
+    accountType: string;
+    accountName: string;
+    lastFourDigits: string;
+    balance: number;
+    isActive: boolean;
+    connectedAt: string;
+}
+
+export interface ConnectionRequest {
+    id: number;
+    requesterId: string;
+    receiverId: string;
+    status: string;
+    createdAt: string;
+    respondedAt?: string;
+    requester?: { id: string; username: string; email: string };
+    receiver?: { id: string; username: string; email: string };
+}
+
+export interface SharedTransaction {
+    id: number;
+    originalTransactionId: number;
+    sharedByUserId: string;
+    sharedWithUserId: string;
+    category: string;
+    amount: number;
+    type: string;
+    date: string;
+    description?: string;
+    createdAt: string;
+}
+
