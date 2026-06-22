@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /add
+Disallow: /transactions
+Disallow: /budgets
+Disallow: /goals
+Disallow: /spark-connect
+Disallow: /connections
+
+Sitemap: https://sparkfinance.app/sitemap.xml
