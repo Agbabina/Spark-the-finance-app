@@ -67,9 +67,7 @@ describe("API Module", () => {
     });
 
     it("should have default baseURL as fallback", () => {
-      // Even if VITE_API_BASE_URL is not set, it should default to localhost:5219
-      const baseUrl = api.defaults.baseURL;
-      expect(baseUrl).toMatch(/localhost:5219|http:\/\/localhost:\d+/);
+      expect(api.defaults.baseURL).toBe("https://spark-the-finance-app.fly.dev");
     });
   });
 
