@@ -98,10 +98,26 @@ using (var scope = app.Services.CreateScope())
     EnsureSharedTransactionsTable(db);
 }
 
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrEmpty(port))
+{
+    app.Urls.Add($"http://0.0.0.0:{port}");
+}
+
+app.UseStaticFiles();
+app.UseDefaultFiles();
+
+app.UseRouting();
+
 app.UseCors("AllowReact");
+
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
+
+app.MapFallbackToFile("index.html");
+
 app.Run();
 
 static void EnsureTransactionUserIdColumn(AppDbContext db)
