@@ -360,10 +360,11 @@ export default function SparkConnect() {
                     </div>
                 ) : (
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {accounts.map((account) => (
+                        {accounts.map((account, index) => (
                             <div
                                 key={account.id}
-                                className="card flex flex-col gap-4 p-6 transition hover:scale-[1.01]"
+                                className="card interactive-card flex flex-col gap-4 p-6"
+                                style={{ animationDelay: `${index * 0.06}s` }}
                             >
                                 <div className="flex items-start justify-between">
                                     <div className="flex items-center gap-3">

@@ -12,7 +12,7 @@ function Connections() {
     const [activeTab, setActiveTab] = useState<Tab>("connected");
     const [errorMessage, setErrorMessage] = useState("");
     const [loading, setLoading] = useState(true);
-
+    const [mounted, setMounted] = useState(false);
     const [connectedUsers, setConnectedUsers] = useState<Array<{ id: string; username: string; email: string }>>([]);
     const [pendingRequests, setPendingRequests] = useState<ConnectionRequest[]>([]);
     const [sentRequests, setSentRequests] = useState<ConnectionRequest[]>([]);
@@ -23,6 +23,10 @@ function Connections() {
     const [sharingTransactionId, setSharingTransactionId] = useState<number | null>(null);
     const [sharingWithUserId, setSharingWithUserId] = useState("");
     const [sharing, setSharing] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const fetchData = async () => {
         try {
@@ -216,28 +220,32 @@ function Connections() {
                     </div>
                 )}
 
-                <div className="flex gap-2 border-b border-slate-200 dark:border-slate-700">
+                <div className="flex gap-1 border-b border-slate-200 dark:border-slate-700">
                     {tabs.map((tab) => (
                         <button
                             key={tab.key}
                             onClick={() => setActiveTab(tab.key)}
-                            className={`px-4 py-2 text-sm font-semibold transition ${
+                            className={`relative px-4 py-2.5 text-sm font-semibold transition-all duration-200 rounded-t-xl ${
                                 activeTab === tab.key
-                                    ? "border-b-2 border-blue-600 text-blue-600 dark:text-blue-400"
-                                    : "text-slate-500 hover:text-slate-700 dark:text-slate-400"
+                                    ? "text-blue-600 dark:text-blue-400"
+                                    : "text-slate-500 hover:text-slate-700 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50"
                             }`}
                         >
                             {tab.label}
+                            {activeTab === tab.key && (
+                                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-400 rounded-t-full animate-scale-in" />
+                            )}
                         </button>
                     ))}
                 </div>
 
                 {loading ? (
-                    <div className="card flex items-center justify-center p-12">
-                        <p className="text-sm text-slate-500 dark:text-slate-400">Loading connections...</p>
+                    <div className="card flex flex-col items-center justify-center p-12 space-y-4">
+                        <div className="w-10 h-10 border-3 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+                        <p className="text-sm text-slate-500 dark:text-slate-400 animate-pulse">Loading connections...</p>
                     </div>
                 ) : (
-                    <div className="space-y-6">
+                    <div key={activeTab} className="space-y-6 animate-slide-up">
                         {activeTab === "connected" && (
                             <div className="space-y-4">
                                 <form onSubmit={handleSendRequest} className="card p-6 sm:p-8">

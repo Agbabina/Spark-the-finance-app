@@ -915,7 +915,7 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
                             </div>
                         </section>
 
-                        <section className="card p-6">
+                        <section className={`card p-6 transition-all duration-300 hover:shadow-lg ${mounted ? 'animate-slide-up stagger-6' : 'opacity-0'}`}>
                             <div className="mb-4 flex items-center justify-between gap-4">
                                 <div>
                                     <h3 className="text-lg font-bold text-slate-900 dark:text-white">
@@ -928,15 +928,15 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
 
                                 <button
                                     onClick={() => navigate("/transactions")}
-                                    className="text-sm font-semibold text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                    className="text-sm font-semibold text-blue-600 transition-all duration-200 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:underline underline-offset-4"
                                 >
                                     View all
                                 </button>
                             </div>
 
                             {transactions.length === 0 ? (
-                                <div className="rounded-[1.75rem] border border-dashed border-slate-300 bg-slate-50 px-6 py-14 text-center dark:border-slate-700 dark:bg-slate-900/40">
-                                    <BiCreditCard className="mx-auto text-4xl text-slate-400" />
+                                <div className="rounded-[1.75rem] border border-dashed border-slate-300 bg-slate-50 px-6 py-14 text-center transition-all duration-300 dark:border-slate-700 dark:bg-slate-900/40">
+                                    <BiCreditCard className="mx-auto text-4xl text-slate-400 transition-transform duration-300 hover:scale-110" />
                                     <p className="mt-4 text-lg font-semibold text-slate-900 dark:text-white">
                                         No transactions yet
                                     </p>
@@ -952,13 +952,14 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
                                 </div>
                             ) : (
                                 <div className="space-y-3">
-                                    {transactions.slice(-5).reverse().map((t) => (
+                                    {transactions.slice(-5).reverse().map((t, index) => (
                                         <div
                                             key={t.id}
-                                            className="flex flex-col gap-4 rounded-3xl border border-slate-200/70 bg-slate-50 px-4 py-4 transition-colors hover:bg-white dark:border-slate-700 dark:bg-slate-900/50 dark:hover:bg-slate-900 sm:flex-row sm:items-center sm:justify-between"
+                                            className={`flex flex-col gap-4 rounded-3xl border border-slate-200/70 bg-slate-50 px-4 py-4 transition-all duration-200 hover:bg-white hover:shadow-md hover:-translate-y-0.5 dark:border-slate-700 dark:bg-slate-900/50 dark:hover:bg-slate-900 sm:flex-row sm:items-center sm:justify-between ${mounted ? 'animate-slide-up' : 'opacity-0'}`}
+                                            style={{ animationDelay: `${index * 0.06}s` }}
                                         >
                                             <div className="flex items-center gap-3">
-                                                <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${t.type === "income" ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300" : "bg-rose-100 text-rose-600 dark:bg-rose-500/10 dark:text-rose-300"}`}>
+                                                <div className={`flex h-12 w-12 items-center justify-center rounded-2xl transition-transform duration-200 hover:scale-110 ${t.type === "income" ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300" : "bg-rose-100 text-rose-600 dark:bg-rose-500/10 dark:text-rose-300"}`}>
                                                     {t.type === "income" ? "+" : "-"}
                                                 </div>
                                                 <div>
@@ -972,7 +973,7 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
                                                 </div>
                                             </div>
 
-                                            <p className={`text-lg font-bold sm:text-right ${t.type === "income" ? "text-emerald-600 dark:text-emerald-300" : "text-rose-600 dark:text-rose-300"}`}>
+                                            <p className={`text-lg font-bold sm:text-right transition-all duration-200 ${t.type === "income" ? "text-emerald-600 dark:text-emerald-300" : "text-rose-600 dark:text-rose-300"}`}>
                                                 {t.type === "income" ? "+" : "-"}
                                                 {formatCurrency(t.amount)}
                                             </p>
@@ -987,7 +988,7 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
 
             {isSidebarOpen && (
                 <div
-                    className="fixed inset-0 z-40 bg-slate-950/50 backdrop-blur-sm lg:hidden"
+                    className="fixed inset-0 z-40 bg-slate-950/50 backdrop-blur-sm lg:hidden animate-fade-in"
                     onClick={() => setIsSidebarOpen(false)}
                 />
             )}
