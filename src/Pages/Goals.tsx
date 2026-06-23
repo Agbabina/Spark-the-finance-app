@@ -287,7 +287,10 @@ function Goals({ goals, setGoals, setGlobalError, username }: Props) {
                         </div>
 
                         {goals.length === 0 ? (
-                            <div className="rounded-[1.75rem] border border-dashed border-slate-300 bg-slate-50 px-6 py-14 text-center dark:border-slate-700 dark:bg-slate-900/40">
+                            <div className="rounded-[1.75rem] border border-dashed border-slate-300 bg-slate-50 px-6 py-14 text-center transition-all duration-300 hover:border-amber-300 dark:border-slate-700 dark:bg-slate-900/40 dark:hover:border-amber-500/30">
+                                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-50 text-2xl font-black text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 animate-float">
+                                    🎯
+                                </div>
                                 <p className="text-lg font-semibold text-slate-900 dark:text-white">
                                     No goals yet
                                 </p>
@@ -334,8 +337,8 @@ function Goals({ goals, setGoals, setGlobalError, username }: Props) {
                                                 </div>
                                                 <div className="h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
                                                     <div
-                                                        className={`h-full rounded-full ${remaining >= 0 ? "bg-blue-500" : "bg-rose-500"}`}
-                                                        style={{ width: `${progress}%` }}
+                                                        className={`h-full rounded-full progress-bar ${remaining >= 0 ? "bg-blue-500" : "bg-rose-500"} ${remaining < 0 ? "progress-striped" : ""}`}
+                                                        style={{ width: `${Math.min(progress, 100)}%` }}
                                                     />
                                                 </div>
                                             </div>

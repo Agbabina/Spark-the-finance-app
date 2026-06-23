@@ -298,7 +298,10 @@ function Budgets({ budgets, transactions, username, setBudgets, setGlobalError }
                         </div>
 
                         {budgetRows.length === 0 ? (
-                            <div className="rounded-[1.75rem] border border-dashed border-slate-300 bg-slate-50 px-6 py-14 text-center dark:border-slate-700 dark:bg-slate-900/40">
+                            <div className="rounded-[1.75rem] border border-dashed border-slate-300 bg-slate-50 px-6 py-14 text-center transition-all duration-300 hover:border-blue-300 dark:border-slate-700 dark:bg-slate-900/40 dark:hover:border-blue-500/30">
+                                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-2xl font-black text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 animate-float">
+                                    NGN
+                                </div>
                                 <p className="text-lg font-semibold text-slate-900 dark:text-white">
                                     No budgets yet
                                 </p>

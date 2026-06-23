@@ -581,7 +581,7 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
 
                         <button
                             onClick={() => navigate("/add")}
-                            className="btn-primary w-auto px-4 py-3 text-sm"
+                            className="btn-primary w-auto px-4 py-3 text-sm transition-all duration-200 hover:scale-105 active:scale-95"
                         >
                             <BiPlus />
                             Add Transaction
@@ -833,29 +833,40 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
                                     </div>
                                 </div>
 
-                                <ResponsiveContainer width="100%" height={320}>
-                                    <LineChart data={lineData}>
-                                        <XAxis dataKey="day" stroke="currentColor" />
-                                        <YAxis stroke="currentColor" tickFormatter={(value) => value.toLocaleString()} />
-                                        <Tooltip formatter={(value) => [formatCurrency(Number(value)), ""]} />
-                                        <Line
-                                            type="monotone"
-                                            dataKey="income"
-                                            stroke="#10b981"
-                                            strokeWidth={3}
-                                            dot={false}
-                                            name="Income"
-                                        />
-                                        <Line
-                                            type="monotone"
-                                            dataKey="spending"
-                                            stroke="#ef4444"
-                                            strokeWidth={3}
-                                            dot={false}
-                                            name="Expenses"
-                                        />
-                                    </LineChart>
-                                </ResponsiveContainer>
+                                {lineData.length > 0 ? (
+                                    <ResponsiveContainer width="100%" height={320}>
+                                        <LineChart data={lineData}>
+                                            <XAxis dataKey="day" stroke="currentColor" />
+                                            <YAxis stroke="currentColor" tickFormatter={(value) => value.toLocaleString()} />
+                                            <Tooltip formatter={(value) => [formatCurrency(Number(value)), ""]} />
+                                            <Line
+                                                type="monotone"
+                                                dataKey="income"
+                                                stroke="#10b981"
+                                                strokeWidth={3}
+                                                dot={false}
+                                                name="Income"
+                                            />
+                                            <Line
+                                                type="monotone"
+                                                dataKey="spending"
+                                                stroke="#ef4444"
+                                                strokeWidth={3}
+                                                dot={false}
+                                                name="Expenses"
+                                            />
+                                        </LineChart>
+                                    </ResponsiveContainer>
+                                ) : (
+                                    <div className="flex h-80 items-center justify-center">
+                                        <div className="w-full space-y-4 px-8">
+                                            <div className="skeleton h-4 w-3/4" />
+                                            <div className="skeleton h-4 w-1/2" />
+                                            <div className="skeleton h-4 w-2/3" />
+                                            <div className="skeleton h-4 w-1/3" />
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             <div className={`card p-6 transition-all duration-300 hover:shadow-lg ${mounted ? 'animate-slide-up stagger-5' : 'opacity-0'}`}>
@@ -905,10 +916,10 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="flex h-64 items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-slate-50 text-center text-slate-500 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-400">
-                                        <div>
-                                            <BiCreditCard className="mx-auto mb-3 text-4xl opacity-50" />
-                                            <p>No expense data available yet.</p>
+                                    <div className="flex h-64 items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-slate-50 text-center dark:border-slate-700 dark:bg-slate-900/40">
+                                        <div className="space-y-3">
+                                            <BiCreditCard className="mx-auto text-4xl text-slate-400 animate-float" />
+                                            <p className="text-sm text-slate-500 dark:text-slate-400">No expense data available yet.</p>
                                         </div>
                                     </div>
                                 )}
