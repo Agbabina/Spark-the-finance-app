@@ -2,7 +2,7 @@ app = "massive-project"
 primary_region = "lhr"
 
 [build]
-  dockerfile = "Backend/Dockerfile"
+  dockerfile = "Dockerfile"
 
 [env]
   ASPNETCORE_URLS = "http://0.0.0.0:8080"
