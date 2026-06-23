@@ -7,6 +7,7 @@ primary_region = "lhr"
 [env]
   ASPNETCORE_URLS = "http://0.0.0.0:8080"
   DOTNET_RUNNING_IN_CONTAINER = "true"
+  ConnectionStrings__DefaultConnection = "Data Source=/app/data/app.db"
 
 [http_service]
   internal_port = 8080
