@@ -8,6 +8,10 @@ primary_region = "lhr"
   ASPNETCORE_URLS = "http://0.0.0.0:8080"
   DOTNET_RUNNING_IN_CONTAINER = "true"
   ConnectionStrings__DefaultConnection = "Data Source=/app/data/app.db"
+  Jwt__Key = "YourSuperSecretKeyHere12345678901234567890"
+  Jwt__Issuer = "spark-finance"
+  Jwt__Audience = "spark-finance-client"
+  Frontend__Url = "https://spark-the-finance-app.fly.dev"
 
 [http_service]
   internal_port = 8080

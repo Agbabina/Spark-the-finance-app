@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim() || "/";
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim() || "https://spark-the-finance-app.fly.dev";
 
 export const api = axios.create({
     baseURL: apiBaseUrl,
