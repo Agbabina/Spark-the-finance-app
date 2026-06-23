@@ -27,5 +27,5 @@ primary_region = "lhr"
   cpus = 1
 
 [[mounts]]
-  source = "massive-project-data"
+  source = "massive_project_data"
   destination = "/app/data"
