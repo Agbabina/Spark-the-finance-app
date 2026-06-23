@@ -12,7 +12,6 @@ function Connections() {
     const [activeTab, setActiveTab] = useState<Tab>("connected");
     const [errorMessage, setErrorMessage] = useState("");
     const [loading, setLoading] = useState(true);
-    //const [mounted, setMounted] = useState(false);
     const [connectedUsers, setConnectedUsers] = useState<Array<{ id: string; username: string; email: string }>>([]);
     const [pendingRequests, setPendingRequests] = useState<ConnectionRequest[]>([]);
     const [sentRequests, setSentRequests] = useState<ConnectionRequest[]>([]);
@@ -24,9 +23,6 @@ function Connections() {
     const [sharingWithUserId, setSharingWithUserId] = useState("");
     const [sharing, setSharing] = useState(false);
 
-    useEffect(() => {
-        setMounted(true);
-    }, []);
 
     const fetchData = async () => {
         try {

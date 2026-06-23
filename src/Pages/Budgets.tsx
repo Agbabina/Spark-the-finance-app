@@ -261,7 +261,7 @@ function Budgets({ budgets, transactions, username, setBudgets, setGlobalError }
 
                 <section className="space-y-6">
                     <div className="grid gap-4 sm:grid-cols-3">
-                        <div className="card p-6">
+                        <div className="card p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5" style={{ animationDelay: '0.05s' }}>
                             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400">
                                 Planned
                             </p>
@@ -269,7 +269,7 @@ function Budgets({ budgets, transactions, username, setBudgets, setGlobalError }
                                 {formatCurrency(totalLimit)}
                             </p>
                         </div>
-                        <div className="card p-6">
+                        <div className="card p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5" style={{ animationDelay: '0.1s' }}>
                             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rose-600 dark:text-rose-300">
                                 Spent
                             </p>
@@ -277,7 +277,7 @@ function Budgets({ budgets, transactions, username, setBudgets, setGlobalError }
                                 {formatCurrency(totalSpent)}
                             </p>
                         </div>
-                        <div className="card p-6">
+                        <div className="card p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5" style={{ animationDelay: '0.15s' }}>
                             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-300">
                                 Remaining
                             </p>
@@ -312,7 +312,7 @@ function Budgets({ budgets, transactions, username, setBudgets, setGlobalError }
                         ) : (
                             <div className="space-y-4">
                                 {budgetRows.map(({ budget, spent, remaining, progress }) => (
-                                    <div key={budget.id} className="rounded-3xl border border-slate-200/70 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-900/50">
+                                    <div key={budget.id} className="rounded-3xl border border-slate-200/70 bg-slate-50 p-5 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 dark:border-slate-700 dark:bg-slate-900/50">
                                         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                                             <div>
                                                 <p className="text-sm font-semibold text-slate-900 dark:text-white">
