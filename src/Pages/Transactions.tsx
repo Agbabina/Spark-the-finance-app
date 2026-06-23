@@ -118,7 +118,7 @@ function Transactions({ transactions, username }: Props) {
     };
 
     return (
-        <div className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
+        <div className="min-h-screen px-4 py-6 sm:px-6 lg:px-8 page-enter">
             <div className="mx-auto max-w-6xl space-y-6">
                 <section className="card overflow-hidden p-6 sm:p-8">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">

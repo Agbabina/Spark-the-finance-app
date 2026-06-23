@@ -1,4 +1,4 @@
-import { type FormEvent, useMemo, useState } from "react";
+import { type FormEvent, useMemo, useState, useEffect } from "react";
 import { LuBadgeCheck, LuBrainCircuit, LuMenu, LuSend, LuSparkles, LuTriangleAlert, LuWifiOff, LuUsers } from "react-icons/lu";
 import { MdBalance, MdTrendingDown, MdTrendingUp } from "react-icons/md";
 import { GrTransaction } from "react-icons/gr";
@@ -78,8 +78,13 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
     const [onlineQuestion, setOnlineQuestion] = useState("");
     const [onlineAnswer, setOnlineAnswer] = useState("");
     const [onlineQuestionLoading, setOnlineQuestionLoading] = useState(false);
+    const [mounted, setMounted] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
     //I love react router
     const navItems = [
         { name: "Dashboard", icon: MdBalance, path: "/" },
@@ -433,7 +438,7 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
                             </button>
                         </div>
 
-                        <div className="mt-6 rounded-[1.75rem] border border-slate-200/70 bg-slate-100/80 p-5 shadow-xl dark:border-slate-800 dark:bg-slate-950/90">
+                        <div className={`mt-6 rounded-[1.75rem] border border-slate-200/70 bg-slate-100/80 p-5 shadow-xl transition-all duration-300 hover:shadow-2xl dark:border-slate-800 dark:bg-slate-950/90 ${mounted ? 'animate-slide-in-left stagger-1' : 'opacity-0'}`}>
                             <p className="text-xs uppercase tracking-[0.25em] text-slate-500 dark:text-slate-400">
                                 Welcome back
                             </p>
@@ -445,7 +450,7 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
                             </p>
                         </div>
 
-                        <div className="mt-6 rounded-[1.75rem] border border-slate-200/70 bg-blue-50/90 p-5 shadow-xl dark:border-slate-800 dark:bg-slate-950/85">
+                        <div className={`mt-6 rounded-[1.75rem] border border-slate-200/70 bg-blue-50/90 p-5 shadow-xl transition-all duration-300 hover:shadow-2xl dark:border-slate-800 dark:bg-slate-950/85 ${mounted ? 'animate-slide-in-left stagger-2' : 'opacity-0'}`}>
                             <div className="flex items-center justify-between gap-3">
                                 <div>
                                     <p className="text-xs uppercase tracking-[0.2em] text-blue-700 dark:text-blue-300">
@@ -477,7 +482,7 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
                     </div>
 
                     <nav className="flex-1 space-y-2 p-4">
-                        {navItems.map((item) => {
+                        {navItems.map((item, index) => {
                             const Icon = item.icon;
                             const active = location.pathname === item.path;
 
@@ -488,13 +493,10 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
                                         navigate(item.path);
                                         setIsSidebarOpen(false);
                                     }}
-                                    className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-all ${
-                                        active
-                                            ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
-                                            : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-900/60"
-                                    }`}
+                                    className={`nav-item flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-all duration-200 ${mounted ? 'animate-slide-in-left' : 'opacity-0'} ${active ? "active bg-blue-600 text-white shadow-lg shadow-blue-600/20" : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-900/60 hover:translate-x-1"}`}
+                                    style={{ animationDelay: `${0.1 + index * 0.05}s` }}
                                 >
-                                    <Icon className={active ? "text-white" : "text-blue-600 dark:text-blue-400"} />
+                                    <Icon className={`${active ? "text-white" : "text-blue-600 dark:text-blue-400"} transition-transform duration-200 ${active ? "scale-110" : ""}`} />
                                     <span className="font-medium">{item.name}</span>
                                 </button>
                             );
@@ -502,7 +504,7 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
                     </nav>
 
                     <div className="border-t border-slate-200/70 p-5 dark:border-slate-800">
-                        <div className="rounded-[1.75rem] bg-slate-900 p-5 text-white shadow-2xl dark:bg-slate-900">
+                        <div className={`rounded-[1.75rem] bg-slate-900 p-5 text-white shadow-2xl transition-all duration-300 hover:shadow-cyan-500/20 dark:bg-slate-900 ${mounted ? 'animate-slide-in-left stagger-3' : 'opacity-0'}`}>
                             <div className="flex items-center gap-3">
                                 <div className="rounded-2xl bg-white/10 p-3">
                                     <BiWallet className="text-xl" />
@@ -518,13 +520,13 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
                             </div>
 
                             <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
-                                <div className="rounded-2xl bg-white/10 p-3">
+                                <div className="rounded-2xl bg-white/10 p-3 transition-all duration-200 hover:bg-white/15 hover:scale-[1.02]">
                                     <p className="text-white/50">Income</p>
                                     <p className="mt-1 font-semibold text-emerald-300">
                                         {formatCurrency(totalIncome)}
                                     </p>
                                 </div>
-                                <div className="rounded-2xl bg-white/10 p-3">
+                                <div className="rounded-2xl bg-white/10 p-3 transition-all duration-200 hover:bg-white/15 hover:scale-[1.02]">
                                     <p className="text-white/50">Expenses</p>
                                     <p className="mt-1 font-semibold text-rose-300">
                                         {formatCurrency(totalExpenses)}
@@ -532,7 +534,7 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
                                 </div>
                             </div>
 
-                            <div className="mt-3 rounded-2xl bg-white/10 p-3 text-sm">
+                            <div className="mt-3 rounded-2xl bg-white/10 p-3 text-sm transition-all duration-200 hover:bg-white/15">
                                 <p className="text-white/50">Monthly budgets</p>
                                 <p className="mt-1 font-semibold text-blue-200">
                                     {currentBudgets.length} active
@@ -542,7 +544,7 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
                                 </p>
                             </div>
 
-                            <div className="mt-3 rounded-2xl bg-white/10 p-3 text-sm">
+                            <div className="mt-3 rounded-2xl bg-white/10 p-3 text-sm transition-all duration-200 hover:bg-white/15">
                                 <p className="text-white/50">Savings goals</p>
                                 <p className="mt-1 font-semibold text-amber-200">
                                     {goals.length} active
@@ -590,21 +592,21 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
                 <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
                     <div className="mx-auto max-w-7xl space-y-6">
                         <section className="grid gap-4 sm:grid-cols-3">
-                            <div className="card border-l-4 border-l-blue-500 p-6">
+                            <div className={`card border-l-4 border-l-blue-500 p-6 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-0.5 ${mounted ? 'animate-slide-up stagger-1' : 'opacity-0'}`}>
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
                                             Total Balance
                                         </p>
-                                        <p className={`mt-2 text-2xl font-black ${balance >= 0 ? "text-emerald-600 dark:text-emerald-300" : "text-rose-600 dark:text-rose-300"}`}>
+                                        <p className={`mt-2 text-2xl font-black transition-colors duration-200 ${balance >= 0 ? "text-emerald-600 dark:text-emerald-300" : "text-rose-600 dark:text-rose-300"}`}>
                                             {formatCurrency(Math.abs(balance))}
                                         </p>
                                     </div>
-                                    <BiWallet className="text-3xl text-blue-600 dark:text-blue-400" />
+                                    <BiWallet className="text-3xl text-blue-600 dark:text-blue-400 transition-transform duration-300 group-hover:scale-110" />
                                 </div>
                             </div>
 
-                            <div className="card border-l-4 border-l-emerald-500 p-6">
+                            <div className={`card border-l-4 border-l-emerald-500 p-6 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-0.5 ${mounted ? 'animate-slide-up stagger-2' : 'opacity-0'}`}>
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
@@ -618,7 +620,7 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
                                 </div>
                             </div>
 
-                            <div className="card border-l-4 border-l-rose-500 p-6">
+                            <div className={`card border-l-4 border-l-rose-500 p-6 transition-all duration-300 hover:shadow-lg hover:shadow-rose-500/10 hover:-translate-y-0.5 ${mounted ? 'animate-slide-up stagger-3' : 'opacity-0'}`}>
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
@@ -680,8 +682,8 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
                             </div>
 
                             <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-                                {smartInsights.map((insight) => (
-                                    <div key={insight.title} className={`rounded-2xl border p-4 ${toneClasses[insight.tone]}`}>
+                                {smartInsights.map((insight, index) => (
+                                    <div key={insight.title} className={`rounded-2xl border p-4 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 ${toneClasses[insight.tone]} animate-slide-up stagger-${Math.min(index + 1, 6)}`}>
                                         <p className="text-xs font-semibold uppercase tracking-[0.18em] opacity-70">
                                             {insight.title}
                                         </p>
@@ -696,7 +698,7 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
                             </div>
 
                             <div className="mt-6 grid gap-4 lg:grid-cols-2">
-                                <div className="rounded-2xl border border-slate-200 bg-white/70 p-4 dark:border-slate-700 dark:bg-slate-900/40">
+                                <div className="rounded-2xl border border-slate-200 bg-white/70 p-4 transition-all duration-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/40">
                                     <div className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
                                         <LuTriangleAlert className="text-amber-500" />
                                         Smart alerts
@@ -721,7 +723,7 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
                                     </div>
                                 </div>
 
-                                <div className="rounded-2xl border border-slate-200 bg-white/70 p-4 dark:border-slate-700 dark:bg-slate-900/40">
+                                <div className="rounded-2xl border border-slate-200 bg-white/70 p-4 transition-all duration-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/40">
                                     <div className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
                                         <LuBadgeCheck className="text-emerald-500" />
                                         Offline recommendations
@@ -751,7 +753,7 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
                                 </div>
                             </div>
 
-                            <div className="mt-6 rounded-2xl border border-violet-200 bg-violet-50 p-4 dark:border-violet-500/20 dark:bg-violet-500/10">
+                            <div className="mt-6 rounded-2xl border border-violet-200 bg-violet-50 p-4 transition-all duration-300 hover:shadow-lg dark:border-violet-500/20 dark:bg-violet-500/10">
                                 <div className="flex flex-col gap-4">
                                     <div className="text-sm leading-6 text-violet-950 dark:text-violet-100">
                                         <div className="flex items-center gap-2 font-bold">
@@ -765,10 +767,11 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
                                                 <p>{aiInsight.summary}</p>
                                                 {aiInsight.actions.length > 0 && (
                                                     <div className="grid gap-2 sm:grid-cols-3">
-                                                        {aiInsight.actions.map((action) => (
+                                                        {aiInsight.actions.map((action, index) => (
                                                             <div
                                                                 key={action}
-                                                                className="rounded-2xl border border-violet-200 bg-white/70 px-4 py-3 text-sm font-medium dark:border-violet-500/20 dark:bg-slate-950/30"
+                                                                className="rounded-2xl border border-violet-200 bg-white/70 px-4 py-3 text-sm font-medium transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 dark:border-violet-500/20 dark:bg-slate-950/30"
+                                                                style={{ animationDelay: `${index * 0.05}s` }}
                                                             >
                                                                 {action}
                                                             </div>
@@ -818,7 +821,7 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
                         </section>
 
                         <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-                            <div className="card p-6">
+                            <div className={`card p-6 transition-all duration-300 hover:shadow-lg ${mounted ? 'animate-slide-up stagger-4' : 'opacity-0'}`}>
                                 <div className="mb-4 flex items-center justify-between gap-4">
                                     <div>
                                         <h3 className="text-lg font-bold text-slate-900 dark:text-white">
@@ -855,7 +858,7 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
                                 </ResponsiveContainer>
                             </div>
 
-                            <div className="card p-6">
+                            <div className={`card p-6 transition-all duration-300 hover:shadow-lg ${mounted ? 'animate-slide-up stagger-5' : 'opacity-0'}`}>
                                 <div className="mb-4">
                                     <h3 className="text-lg font-bold text-slate-900 dark:text-white">
                                         Expense Categories

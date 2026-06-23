@@ -164,7 +164,7 @@ function Goals({ goals, setGoals, setGlobalError, username }: Props) {
     };
 
     return (
-        <div className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
+        <div className="min-h-screen px-4 py-6 sm:px-6 lg:px-8 page-enter">
             {showTrophy && completedGoalTitle && (
                 <div className="fixed inset-0 z-50">
                     <TrophyAnimation 

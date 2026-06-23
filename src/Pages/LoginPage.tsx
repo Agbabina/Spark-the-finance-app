@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import axios from "axios";
+import { LuLoader2 } from "react-icons/lu";
 
 import Input from "../Components/Input";
 import { api, setApiAuthToken } from "../lib/api";
@@ -21,6 +21,11 @@ function LoginPage({ setIsLoggedIn, setUsername }: Props) {
     });
     const [errorMessage, setErrorMessage] = useState("");
     const [loading, setLoading] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     useEffect(() => {
         const token = searchParams.get("token");
@@ -65,9 +70,9 @@ function LoginPage({ setIsLoggedIn, setUsername }: Props) {
                 navigate("/", { replace: true });
             }
         } catch (error: unknown) {
-            const message = axios.isAxiosError(error)
-                ? error.response?.data?.message ||
-                  error.response?.data?.errors?.[0] ||
+            const message = error instanceof Error && "response" in error
+                ? (error as any).response?.data?.message ||
+                  (error as any).response?.data?.errors?.[0] ||
                   "An error occurred"
                 : "An error occurred";
             setErrorMessage(message);
@@ -77,7 +82,7 @@ function LoginPage({ setIsLoggedIn, setUsername }: Props) {
     };
 
     const handleGoogleLogin = () => {
-        window.location.href = "/api/auth/google";
+        window.location.href = `/api/auth/google?returnUrl=${encodeURIComponent(window.location.origin)}`;
     };
 
     const title = isRegister ? "Create your account" : "Welcome back";
@@ -87,39 +92,39 @@ function LoginPage({ setIsLoggedIn, setUsername }: Props) {
 
     return (
         <div className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
-            <div className="mx-auto grid min-h-[calc(100vh-3rem)] max-w-6xl items-center gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+            <div className="mx-auto grid min-h-[calc(100vh-3rem)] max-w-6xl items-center gap-6 lg:grid-cols-[1.1fr_0.9fr]">
                 <section
-                    className="relative overflow-hidden rounded-4xl p-8 text-white shadow-2xl sm:p-10"
+                    className={`relative overflow-hidden rounded-4xl p-6 text-white shadow-2xl sm:p-10 lg:p-12 ${mounted ? 'animate-slide-in-left' : 'opacity-0'}`}
                     style={{
                         background:
                             "linear-gradient(135deg, rgba(15,23,42,0.98) 0%, rgba(37,99,235,0.92) 55%, rgba(124,58,237,0.92) 100%)"
                     }}
                 >
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.2),transparent_28%)]" />
-                    <div className="absolute -right-20 top-8 h-40 w-40 rounded-full bg-white/10 blur-3xl" />
-                    <div className="absolute -bottom-12 left-4 h-32 w-32 rounded-full bg-cyan-300/20 blur-3xl" />
+                    <div className={`absolute -right-20 top-8 h-40 w-40 rounded-full bg-white/10 blur-3xl ${mounted ? 'animate-float' : 'opacity-0'}`} />
+                    <div className={`absolute -bottom-12 left-4 h-32 w-32 rounded-full bg-cyan-300/20 blur-3xl ${mounted ? 'animate-float delay-200' : 'opacity-0'}`} />
 
                     <div className="relative z-10 max-w-xl">
                         <p className="text-sm font-semibold uppercase tracking-[0.35em] text-blue-100/80">
                             Spark Finance
                         </p>
-                        <h1 className="mt-6 text-4xl font-black tracking-tight sm:text-5xl">
+                        <h1 className="mt-6 text-3xl font-black tracking-tight sm:text-5xl">
                             Track money with a calmer, sharper dashboard.
                         </h1>
                         <p className="mt-4 max-w-lg text-sm leading-7 text-blue-50/90 sm:text-base">
                             Capture income, watch spending, and read your finances at a glance without visual noise.
                         </p>
 
-                        <div className="mt-10 grid gap-4 sm:grid-cols-3">
-                            <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur">
+                        <div className="mt-10 grid gap-3 sm:grid-cols-3">
+                            <div className={`rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur ${mounted ? 'animate-slide-up stagger-1' : 'opacity-0'}`}>
                                 <p className="text-xs uppercase tracking-[0.2em] text-blue-100/70">Fast entry</p>
                                 <p className="mt-2 text-sm font-semibold">Log transactions in seconds.</p>
                             </div>
-                            <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur">
+                            <div className={`rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur ${mounted ? 'animate-slide-up stagger-2' : 'opacity-0'}`}>
                                 <p className="text-xs uppercase tracking-[0.2em] text-blue-100/70">Clear insight</p>
                                 <p className="mt-2 text-sm font-semibold">See income and expenses together.</p>
                             </div>
-                            <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur">
+                            <div className={`rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur ${mounted ? 'animate-slide-up stagger-3' : 'opacity-0'}`}>
                                 <p className="text-xs uppercase tracking-[0.2em] text-blue-100/70">Secure access</p>
                                 <p className="mt-2 text-sm font-semibold">Your JWT session stays protected.</p>
                             </div>
@@ -127,7 +132,7 @@ function LoginPage({ setIsLoggedIn, setUsername }: Props) {
                     </div>
                 </section>
 
-                <section className="surface rounded-4xl p-6 sm:p-8">
+                <section className={`surface rounded-4xl p-5 sm:p-8 ${mounted ? 'animate-slide-in-right' : 'opacity-0'}`}>
                     <div className="flex items-start justify-between gap-4">
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-600 dark:text-blue-400">
@@ -151,7 +156,7 @@ function LoginPage({ setIsLoggedIn, setUsername }: Props) {
                     </div>
 
                     {errorMessage && (
-                        <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200">
+                        <div className={`mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200 ${mounted ? 'animate-scale-in' : 'opacity-0'}`}>
                             {errorMessage}
                         </div>
                     )}
@@ -189,7 +194,14 @@ function LoginPage({ setIsLoggedIn, setUsername }: Props) {
                         />
 
                         <button className="btn-primary" disabled={loading}>
-                            {loading ? "Please wait..." : isRegister ? "Create account" : "Login"}
+                            {loading ? (
+                                <span className="flex items-center gap-2">
+                                    <LuLoader2 className="animate-spin" />
+                                    {isRegister ? "Creating account..." : "Signing in..."}
+                                </span>
+                            ) : (
+                                isRegister ? "Create account" : "Login"
+                            )}
                         </button>
                     </form>
 
@@ -202,7 +214,7 @@ function LoginPage({ setIsLoggedIn, setUsername }: Props) {
                     <button
                         type="button"
                         onClick={handleGoogleLogin}
-                        className="flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                        className="flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 hover:border-blue-300 dark:hover:border-blue-500/40"
                     >
                         <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
                             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
@@ -219,7 +231,7 @@ function LoginPage({ setIsLoggedIn, setUsername }: Props) {
                             setIsRegister(!isRegister);
                             setErrorMessage("");
                         }}
-                        className="mt-4 w-full text-sm font-semibold text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                        className="mt-4 w-full text-sm font-semibold text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:underline underline-offset-4"
                     >
                         {isRegister ? "Already have an account? Login" : "Need an account? Register"}
                     </button>

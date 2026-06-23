@@ -158,10 +158,24 @@ public class AuthController : ControllerBase
         }
 
         var token = GenerateJwtToken(user);
-        var frontendUrl = _configuration["Frontend:Url"] ?? "http://localhost:5173";
+        var frontendUrl = _configuration["Frontend:Url"];
+        if (string.IsNullOrEmpty(frontendUrl))
+        {
+            var requestOrigin = $"{Request.Scheme}://{Request.Host}";
+            frontendUrl = Request.Headers["Origin"].ToString();
+            if (string.IsNullOrEmpty(frontendUrl))
+            {
+                frontendUrl = requestOrigin;
+            }
+        }
         var targetUrl = !string.IsNullOrEmpty(returnUrl) ? returnUrl : frontendUrl;
 
-        return Redirect($"{targetUrl}/login?token={token}");
+        if (!targetUrl.EndsWith("/login") && !targetUrl.EndsWith("/"))
+        {
+            targetUrl = targetUrl.TrimEnd('/') + "/login";
+        }
+
+        return Redirect($"{targetUrl}?token={token}");
     }
 }
 

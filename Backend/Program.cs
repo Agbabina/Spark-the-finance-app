@@ -75,9 +75,10 @@ builder.Services.AddCors(
     {
         options.AddPolicy("AllowReact", policy =>
         {
-            policy.AllowAnyOrigin()
+            policy.SetIsOriginAllowed(origin => true)
                   .AllowAnyHeader()
-                  .AllowAnyMethod();
+                  .AllowAnyMethod()
+                  .WithExposedHeaders("Content-Disposition");
         });
     }
 );

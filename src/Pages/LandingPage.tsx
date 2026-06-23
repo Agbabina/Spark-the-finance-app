@@ -28,7 +28,7 @@ function LandingPage() {
     const isDark = theme === "dark";
 
     return (
-        <div style={{ minHeight: "100vh", background: isDark ? "#020617" : "#f8fafc", color: isDark ? "#ffffff" : "#0f172a", transition: "background 300ms ease, color 300ms ease" }}>
+        <div className="animate-fade-in" style={{ minHeight: "100vh", background: isDark ? "#020617" : "#f8fafc", color: isDark ? "#ffffff" : "#0f172a", transition: "background 300ms ease, color 300ms ease" }}>
             <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, borderBottom: isDark ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(0,0,0,0.08)", background: isDark ? "rgba(2,6,23,0.8)" : "rgba(255,255,255,0.8)", backdropFilter: "blur(12px)" }}>
                 <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>

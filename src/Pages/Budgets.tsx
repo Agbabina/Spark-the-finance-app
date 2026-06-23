@@ -165,7 +165,7 @@ function Budgets({ budgets, transactions, username, setBudgets, setGlobalError }
     };
 
     return (
-        <div className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
+        <div className="min-h-screen px-4 py-6 sm:px-6 lg:px-8 page-enter">
             <div className="mx-auto grid max-w-7xl gap-6 xl:grid-cols-[360px_1fr]">
                 <form onSubmit={handleSubmit} className="card p-6 sm:p-8">
                     <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-600 dark:text-blue-400">

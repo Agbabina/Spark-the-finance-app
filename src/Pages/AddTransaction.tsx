@@ -139,7 +139,7 @@ function AddTransaction({ setTransactions, darkMode: _darkMode, username, setGlo
     const previewAmount = form.amount || 0;
 
     return (
-        <div className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
+        <div className="min-h-screen px-4 py-6 sm:px-6 lg:px-8 page-enter">
             <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[1fr_320px]">
                 <form
                     onSubmit={handleSubmit}
