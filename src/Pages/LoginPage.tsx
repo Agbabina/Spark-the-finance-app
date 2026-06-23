@@ -38,7 +38,7 @@ function LoginPage({ setIsLoggedIn, setUsername }: Props) {
                 setApiAuthToken(token);
                 setUsername(username);
                 setIsLoggedIn(true);
-                navigate("/transactions", { replace: true });
+                navigate("/", { replace: true });
             } catch {
                 setErrorMessage("Invalid login token");
             }
@@ -67,7 +67,7 @@ function LoginPage({ setIsLoggedIn, setUsername }: Props) {
                 setApiAuthToken(response.data.token);
                 setUsername(form.username);
                 setIsLoggedIn(true);
-                navigate("/transactions", { replace: true });
+                navigate("/", { replace: true });
             }
         } catch (error: unknown) {
             const message = error instanceof Error && "response" in error

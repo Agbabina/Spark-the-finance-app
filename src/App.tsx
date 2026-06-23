@@ -173,7 +173,7 @@ function App() {
                                 />
                             </div>
                         ) : (
-                            <Navigate to="/" replace />
+                            <Navigate to="/login" replace />
                         )
                     }
                 />
@@ -188,7 +188,7 @@ function App() {
                                 />
                             </div>
                         ) : (
-                            <Navigate to="/" replace />
+                            <Navigate to="/login" replace />
                         )
                     }
                 />
@@ -206,7 +206,7 @@ function App() {
                                 />
                             </div>
                         ) : (
-                            <Navigate to="/" replace />
+                            <Navigate to="/login" replace />
                         )
                     }
                 />
@@ -223,7 +223,7 @@ function App() {
                                 />
                             </div>
                         ) : (
-                            <Navigate to="/" replace />
+                            <Navigate to="/login" replace />
                         )
                     }
                 />
@@ -235,7 +235,7 @@ function App() {
                                 <SparkConnect />
                             </div>
                         ) : (
-                            <Navigate to="/" replace />
+                            <Navigate to="/login" replace />
                         )
                     }
                 />
@@ -247,7 +247,7 @@ function App() {
                                 <Connections />
                             </div>
                         ) : (
-                            <Navigate to="/" replace />
+                            <Navigate to="/login" replace />
                         )
                     }
                 />
