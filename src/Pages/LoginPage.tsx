@@ -91,10 +91,10 @@ function LoginPage({ setIsLoggedIn, setUsername }: Props) {
         : "Sign in to continue where you left off.";
 
     return (
-        <div className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
+        <div className="min-h-screen px-4 py-6 sm:px-6 lg:px-8 bg-slate-950 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
             <div className="mx-auto grid min-h-[calc(100vh-3rem)] max-w-6xl items-center gap-6 lg:grid-cols-[1.1fr_0.9fr]">
                 <section
-                    className={`relative overflow-hidden rounded-4xl p-6 text-white shadow-2xl sm:p-10 lg:p-12 ${mounted ? 'animate-slide-in-left' : 'opacity-0'}`}
+                    className={`relative overflow-hidden rounded-4xl p-6 text-white shadow-2xl sm:p-10 lg:p-12 bg-slate-900 dark:bg-slate-900 ${mounted ? 'animate-slide-in-left' : 'opacity-0'}`}
                     style={{
                         background:
                             "linear-gradient(135deg, rgba(15,23,42,0.98) 0%, rgba(37,99,235,0.92) 55%, rgba(124,58,237,0.92) 100%)"
@@ -108,7 +108,7 @@ function LoginPage({ setIsLoggedIn, setUsername }: Props) {
                         <p className="text-sm font-semibold uppercase tracking-[0.35em] text-blue-100/80">
                             Spark Finance
                         </p>
-                        <h1 className="mt-6 text-3xl font-black tracking-tight sm:text-5xl">
+                        <h1 className="mt-6 text-3xl font-black tracking-tight sm:text-5xl text-white">
                             Track money with a calmer, sharper dashboard.
                         </h1>
                         <p className="mt-4 max-w-lg text-sm leading-7 text-blue-50/90 sm:text-base">
@@ -118,21 +118,21 @@ function LoginPage({ setIsLoggedIn, setUsername }: Props) {
                         <div className="mt-10 grid gap-3 sm:grid-cols-3">
                             <div className={`rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur ${mounted ? 'animate-slide-up stagger-1' : 'opacity-0'}`}>
                                 <p className="text-xs uppercase tracking-[0.2em] text-blue-100/70">Fast entry</p>
-                                <p className="mt-2 text-sm font-semibold">Log transactions in seconds.</p>
+                                <p className="mt-2 text-sm font-semibold text-white">Log transactions in seconds.</p>
                             </div>
                             <div className={`rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur ${mounted ? 'animate-slide-up stagger-2' : 'opacity-0'}`}>
                                 <p className="text-xs uppercase tracking-[0.2em] text-blue-100/70">Clear insight</p>
-                                <p className="mt-2 text-sm font-semibold">See income and expenses together.</p>
+                                <p className="mt-2 text-sm font-semibold text-white">See income and expenses together.</p>
                             </div>
                             <div className={`rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur ${mounted ? 'animate-slide-up stagger-3' : 'opacity-0'}`}>
                                 <p className="text-xs uppercase tracking-[0.2em] text-blue-100/70">Secure access</p>
-                                <p className="mt-2 text-sm font-semibold">Your JWT session stays protected.</p>
+                                <p className="mt-2 text-sm font-semibold text-white">Your JWT session stays protected.</p>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <section className={`surface rounded-4xl p-5 sm:p-8 ${mounted ? 'animate-slide-in-right' : 'opacity-0'}`}>
+                <section className={`surface rounded-4xl p-5 sm:p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl dark:shadow-slate-950/50 ${mounted ? 'animate-slide-in-right' : 'opacity-0'}`}>
                     <div className="flex items-start justify-between gap-4">
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-600 dark:text-blue-400">
@@ -156,7 +156,7 @@ function LoginPage({ setIsLoggedIn, setUsername }: Props) {
                     </div>
 
                     {errorMessage && (
-                        <div className={`mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200 ${mounted ? 'animate-scale-in' : 'opacity-0'}`}>
+                        <div className={`mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/40 dark:bg-rose-500/10 dark:text-rose-200 ${mounted ? 'animate-scale-in' : 'opacity-0'}`}>
                             {errorMessage}
                         </div>
                     )}
@@ -207,14 +207,14 @@ function LoginPage({ setIsLoggedIn, setUsername }: Props) {
 
                     <div className="my-6 flex items-center gap-4">
                         <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
-                        <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">or</span>
+                        <span className="text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">or</span>
                         <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
                     </div>
 
                     <button
                         type="button"
                         onClick={handleGoogleLogin}
-                        className="flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 hover:border-blue-300 dark:hover:border-blue-500/40"
+                        className="flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 hover:border-blue-300 dark:hover:border-blue-500/40"
                     >
                         <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
                             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
