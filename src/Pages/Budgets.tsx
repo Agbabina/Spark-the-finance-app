@@ -348,8 +348,8 @@ function Budgets({ budgets, transactions, username, setBudgets, setGlobalError }
                                             </div>
                                             <div className="h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
                                                 <div
-                                                    className={`h-full rounded-full ${remaining >= 0 ? "bg-emerald-500" : "bg-rose-500"}`}
-                                                    style={{ width: `${progress}%` }}
+                                                    className={`h-full rounded-full progress-bar ${remaining >= 0 ? "bg-emerald-500" : "bg-rose-500"} ${remaining < 0 ? "progress-striped" : ""}`}
+                                                    style={{ width: `${Math.min(progress, 100)}%` }}
                                                 />
                                             </div>
                                         </div>

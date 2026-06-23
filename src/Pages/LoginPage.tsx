@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { LuLoader2 } from "react-icons/lu";
+import { LuLoader } from "react-icons/lu";
 
 import Input from "../Components/Input";
 import { api, setApiAuthToken } from "../lib/api";
@@ -196,7 +196,7 @@ function LoginPage({ setIsLoggedIn, setUsername }: Props) {
                         <button className="btn-primary" disabled={loading}>
                             {loading ? (
                                 <span className="flex items-center gap-2">
-                                    <LuLoader2 className="animate-spin" />
+                                    <LuLoader className="animate-spin" />
                                     {isRegister ? "Creating account..." : "Signing in..."}
                                 </span>
                             ) : (

@@ -432,7 +432,7 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
 
                             <button
                                 onClick={() => setDarkMode(!darkMode)}
-                                className="btn-secondary w-auto px-4 py-2 text-sm"
+                                className="btn-secondary w-auto px-4 py-2 text-sm transition-all duration-300 hover:shadow-md"
                             >
                                 {darkMode ? "Light mode" : "Dark mode"}
                             </button>
@@ -656,23 +656,23 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
                                         <input
                                             value={coachQuestion}
                                             onChange={(event) => setCoachQuestion(event.target.value)}
-                                            className="input-field min-h-12"
+                                            className="input-field min-h-12 transition-all duration-200 focus:scale-[1.01]"
                                             placeholder="Ask: forecast this month, what can I cut, any duplicates..."
                                         />
-                                        <button className="btn-primary w-full px-5 py-3 text-sm sm:w-auto">
+                                        <button className="btn-primary w-full px-5 py-3 text-sm sm:w-auto transition-all duration-200 active:scale-95">
                                             <LuSend />
                                             Ask
                                         </button>
                                     </form>
 
-                                    <div className="mt-4 rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm leading-6 text-cyan-950 dark:border-cyan-500/20 dark:bg-cyan-500/10 dark:text-cyan-100">
+                                    <div className="mt-4 rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm leading-6 text-cyan-950 transition-all duration-300 hover:shadow-sm dark:border-cyan-500/20 dark:bg-cyan-500/10 dark:text-cyan-100">
                                         {coachAnswer}
                                     </div>
                                 </div>
 
-                                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-100">
+                                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-100 transition-all duration-300 hover:shadow-md hover:scale-[1.01]">
                                     <div className="flex items-center gap-2">
-                                        <LuWifiOff />
+                                        <LuWifiOff className="animate-bounce-soft" />
                                         Data saver on
                                     </div>
                                     <p className="mt-2 text-xs font-normal leading-5">

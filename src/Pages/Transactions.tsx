@@ -175,7 +175,7 @@ function Transactions({ transactions, username }: Props) {
                 <section className="card p-4 sm:p-6">
                     {transactions.length === 0 ? (
                         <div className="flex flex-col items-center justify-center rounded-[1.75rem] border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center dark:border-slate-700 dark:bg-slate-900/40">
-                            <div className="rounded-full bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-700 dark:bg-blue-500/10 dark:text-blue-300">
+                            <div className="rounded-full bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-700 dark:bg-blue-500/10 dark:text-blue-300 animate-pulse-glow">
                                 Nothing here yet
                             </div>
                             <h2 className="mt-4 text-2xl font-bold text-slate-900 dark:text-white">
@@ -252,8 +252,8 @@ function Transactions({ transactions, username }: Props) {
             </div>
 
             {openShareId !== null && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={closeShare}>
-                    <div className="card w-full max-w-md p-6 sm:p-8" onClick={(e) => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate-fade-in" onClick={closeShare}>
+                    <div className="card w-full max-w-md p-6 sm:p-8 animate-scale-in" onClick={(e) => e.stopPropagation()}>
                         <h3 className="text-lg font-bold text-slate-900 dark:text-white">
                             Share transaction
                         </h3>
@@ -262,13 +262,13 @@ function Transactions({ transactions, username }: Props) {
                         </p>
 
                         {shareState?.error && (
-                            <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200">
+                            <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200 animate-slide-up">
                                 {shareState.error}
                             </div>
                         )}
 
                         {shareState?.success && (
-                            <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200">
+                            <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200 animate-scale-in">
                                 Shared successfully
                             </div>
                         )}

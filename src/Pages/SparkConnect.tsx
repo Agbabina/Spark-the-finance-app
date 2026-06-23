@@ -419,9 +419,9 @@ export default function SparkConnect() {
                                 </div>
 
                                 <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                                    <span className="flex items-center gap-1">
-                                        <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                                        Active
+                                    <span className="flex items-center gap-1.5">
+                                        <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse-glow" />
+                                        <span className="font-medium">Active</span>
                                     </span>
                                     <span>
                                         {new Date(account.connectedAt).toLocaleDateString(undefined, {
