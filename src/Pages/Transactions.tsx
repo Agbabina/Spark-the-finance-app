@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LuShare2 } from "react-icons/lu";
 import axios from "axios";
-
+//Transactions b
 import { api, setApiAuthToken } from "../lib/api";
 import type { Transaction } from "../types";
 
