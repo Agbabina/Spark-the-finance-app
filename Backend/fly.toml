@@ -12,7 +12,7 @@ primary_region = "lhr"
   Jwt__Key = "YourSuperSecretKeyHere12345678901234567890"
   Jwt__Issuer = "spark-finance"
   Jwt__Audience = "spark-finance-client"
-  Frontend__Url = "https://spark-5o8xbl3h6-agbabinas-projects.vercel.app"
+  Frontend__Url = "https://spark-woug4iki9-agbabinas-projects.vercel.app"
 
 [http_service]
   internal_port = 8080

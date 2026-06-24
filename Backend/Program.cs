@@ -73,6 +73,8 @@ builder.Services.AddAuthentication(options =>
     options.Scope.Add("email");
 });
 
+builder.Services.AddAuthorization();
+
 builder.Services.AddScoped<TransactionService>();
 builder.Services.AddScoped<BudgetService>();
 builder.Services.AddScoped<BudgetRoomService>();
@@ -81,21 +83,21 @@ builder.Services.AddScoped<AccountConnectionService>();
 builder.Services.AddScoped<ConnectionService>();
 builder.Services.AddHttpClient<AiInsightService>();
 
-var frontendUrl = builder.Configuration["Frontend:Url"] ?? "http://localhost:5173";
-var allowedOrigins = new[] { frontendUrl }.Where(origin => !string.IsNullOrWhiteSpace(origin)).ToArray();
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>() ?? [];
 
-builder.Services.AddCors(
-    options =>
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowVercel", policy =>
     {
-        options.AddPolicy("AllowReact", policy =>
-        {
-            policy.WithOrigins(allowedOrigins)
-                  .AllowAnyHeader()
-                  .AllowAnyMethod()
-                  .WithExposedHeaders("Content-Disposition");
-        });
-    }
-);
+        policy
+            .WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
 
 var app = builder.Build();
 
@@ -126,12 +128,13 @@ if (!string.IsNullOrEmpty(port))
     app.Urls.Add($"http://0.0.0.0:{port}");
 }
 
+app.UseCors("AllowVercel");
+app.UseHttpsRedirection();
+
 app.UseStaticFiles();
 app.UseDefaultFiles();
 
 app.UseRouting();
-
-app.UseCors("AllowReact");
 
 app.UseAuthentication();
 app.UseAuthorization();
