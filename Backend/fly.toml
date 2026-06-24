@@ -11,7 +11,7 @@ primary_region = "lhr"
   Jwt__Key = "YourSuperSecretKeyHere12345678901234567890"
   Jwt__Issuer = "spark-finance"
   Jwt__Audience = "spark-finance-client"
-  Frontend__Url = "https://spark-the-finance-app.fly.dev"
+  Frontend__Url = "https://spark-one-pied.vercel.app"
 
 [http_service]
   internal_port = 8080
