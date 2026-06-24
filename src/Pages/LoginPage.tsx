@@ -149,7 +149,27 @@ function LoginPage({ setIsLoggedIn, setUsername }: Props) {
                         <button
                             type="button"
                             onClick={() => setIsRegister(!isRegister)}
-                            className="btn-secondary w-auto shrink-0 px-4 py-2 text-sm"
+                            style={{
+                                background: "linear-gradient(135deg, #2563eb, #7c3aed)",
+                                color: "#ffffff",
+                                border: "none",
+                                borderRadius: "12px",
+                                padding: "8px 18px",
+                                fontSize: "13px",
+                                fontWeight: 700,
+                                cursor: "pointer",
+                                whiteSpace: "nowrap",
+                                boxShadow: "0 4px 14px rgba(37, 99, 235, 0.35)",
+                                transition: "transform 160ms ease, box-shadow 160ms ease"
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = "translateY(-1px)";
+                                e.currentTarget.style.boxShadow = "0 6px 20px rgba(37, 99, 235, 0.45)";
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = "translateY(0)";
+                                e.currentTarget.style.boxShadow = "0 4px 14px rgba(37, 99, 235, 0.35)";
+                            }}
                         >
                             {isRegister ? "Login" : "Register"}
                         </button>
@@ -193,7 +213,11 @@ function LoginPage({ setIsLoggedIn, setUsername }: Props) {
                             required
                         />
 
-                        <button className="btn-primary" disabled={loading}>
+                        <button
+                            type="submit"
+                            className="btn-primary transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                            disabled={loading}
+                        >
                             {loading ? (
                                 <span className="flex items-center gap-2">
                                     <LuLoader className="animate-spin" />
@@ -214,7 +238,7 @@ function LoginPage({ setIsLoggedIn, setUsername }: Props) {
                     <button
                         type="button"
                         onClick={handleGoogleLogin}
-                        className="flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 hover:border-blue-300 dark:hover:border-blue-500/40"
+                        className="flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition-all duration-200 hover:scale-[1.01] hover:border-blue-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 dark:hover:border-blue-500/40"
                     >
                         <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
                             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
@@ -231,7 +255,7 @@ function LoginPage({ setIsLoggedIn, setUsername }: Props) {
                             setIsRegister(!isRegister);
                             setErrorMessage("");
                         }}
-                        className="mt-4 w-full text-sm font-semibold text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:underline underline-offset-4"
+                        className="mt-4 w-full text-sm font-semibold text-blue-600 transition-all duration-200 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:underline underline-offset-4"
                     >
                         {isRegister ? "Already have an account? Login" : "Need an account? Register"}
                     </button>

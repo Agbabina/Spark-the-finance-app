@@ -82,7 +82,7 @@ function LandingPage() {
 
             <section style={{ padding: "80px 0", background: isDark ? "transparent" : "#ffffff", transition: "background 300ms ease" }}>
                 <div style={{ maxWidth: "896px", margin: "0 auto", padding: "0 16px", textAlign: "center" }}>
-                    <h2 style={{ fontSize: "clamp(30px, 4vw, 36px)", fontWeight: 900, color: isDark ? "#ffffff" : "#0f172a", margin: 0 }}>Built for people who hate visual noise.</h2>
+                    <h2 style={{ fontSize: "clamp(30px, 4vw, 36px)", fontWeight: 900, color: isDark ? "#ffffff" : "#0f172a", margin: 0 }}>Built for people who prefer a calm, clutter-free experience.</h2>
                     <p style={{ margin: "16px auto 0", maxWidth: "672px", fontSize: "18px", lineHeight: 1.7, color: isDark ? "#cbd5e1" : "#475569" }}>
                         Most finance apps feel like a spreadsheet dressed in neon. Spark keeps the interface calm so you can focus on what matters: your money.
                     </p>
