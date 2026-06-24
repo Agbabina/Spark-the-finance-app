@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: spark-frontend
+    runtime: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
