@@ -50,6 +50,17 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtAudience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
     };
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            if (context.Request.Method.Equals("OPTIONS", StringComparison.OrdinalIgnoreCase))
+            {
+                context.NoResult();
+            }
+            return Task.CompletedTask;
+        }
+    };
 })
 .AddCookie("External")
 .AddGoogle("Google", options =>
@@ -70,12 +81,15 @@ builder.Services.AddScoped<AccountConnectionService>();
 builder.Services.AddScoped<ConnectionService>();
 builder.Services.AddHttpClient<AiInsightService>();
 
+var frontendUrl = builder.Configuration["Frontend:Url"] ?? "http://localhost:5173";
+var allowedOrigins = new[] { frontendUrl }.Where(origin => !string.IsNullOrWhiteSpace(origin)).ToArray();
+
 builder.Services.AddCors(
     options =>
     {
         options.AddPolicy("AllowReact", policy =>
         {
-            policy.SetIsOriginAllowed(origin => true)
+            policy.WithOrigins(allowedOrigins)
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .WithExposedHeaders("Content-Disposition");
