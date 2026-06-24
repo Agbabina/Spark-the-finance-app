@@ -99,17 +99,25 @@ builder.Services.AddCors(
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+try
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureCreated();
-    EnsureTransactionUserIdColumn(db);
-    EnsureBudgetTable(db);
-    EnsureGoalTable(db);
-    EnsureBankAccountTable(db);
-    EnsureBudgetIsSharedColumn(db);
-    EnsureConnectionRequestsTable(db);
-    EnsureSharedTransactionsTable(db);
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        db.Database.EnsureCreated();
+        EnsureTransactionUserIdColumn(db);
+        EnsureBudgetTable(db);
+        EnsureGoalTable(db);
+        EnsureBankAccountTable(db);
+        EnsureBudgetIsSharedColumn(db);
+        EnsureConnectionRequestsTable(db);
+        EnsureSharedTransactionsTable(db);
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Database initialization error: {ex.Message}");
+    Console.WriteLine(ex.StackTrace);
 }
 
 var port = Environment.GetEnvironmentVariable("PORT");
