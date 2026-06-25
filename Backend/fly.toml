@@ -11,8 +11,8 @@ primary_region = "lhr"
   ConnectionStrings__DefaultConnection = "Data Source=/app/data/app.db"
   Jwt__Key = "YourSuperSecretKeyHere12345678901234567890"
   Jwt__Issuer = "spark-finance"
-  Jwt__Audience = "spark-finance-client"
-  Frontend__Url = "https://spark-woug4iki9-agbabinas-projects.vercel.app"
+  Jwt__Audience = "https://sparkfinance.onrender.com"
+  Frontend__Url = "https://sparkfinance.onrender.com"
 
 [http_service]
   internal_port = 8080
