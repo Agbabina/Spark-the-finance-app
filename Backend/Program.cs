@@ -123,16 +123,15 @@ catch (Exception ex)
 }
 
 var port = Environment.GetEnvironmentVariable("PORT");
-if (!string.IsNullOrEmpty(port))
-{
-    app.Urls.Add($"http://0.0.0.0:{port}");
-}
 
-app.UseCors("AllowVercel");
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseDefaultFiles();
+
+app.UseRouting();
+
+app.UseCors("AllowVercel");
 
 app.UseAuthentication();
 app.UseAuthorization();
