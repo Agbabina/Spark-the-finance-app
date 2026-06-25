@@ -6,14 +6,7 @@ import Input from "../Components/Input";
 import { api, setApiAuthToken } from "../lib/api";
 import { expenseCategories } from "../lib/categories";
 import type { Budget, Transaction } from "../types";
-
-interface Props {
-    budgets: Budget[];
-    transactions: Transaction[];
-    username: string;
-    setBudgets: React.Dispatch<React.SetStateAction<Budget[]>>;
-    setGlobalError: React.Dispatch<React.SetStateAction<string>>;
-}
+import { useAppData } from "../contexts/AppDataContext";
 
 const monthOptions = [
     "January",
@@ -34,11 +27,12 @@ function formatCurrency(value: number) {
     return `NGN ${value.toLocaleString()}`;
 }
 
-function Budgets({ budgets, transactions, username, setBudgets, setGlobalError }: Props) {
+function Budgets() {
     const navigate = useNavigate();
-    const now = new Date();
+    const { budgets, transactions, username, setBudgets, setGlobalError } = useAppData();
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
+    const now = new Date();
     const [form, setForm] = useState({
         category: "",
         limit: "",
