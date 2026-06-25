@@ -61,16 +61,6 @@ builder.Services.AddAuthentication(options =>
             return Task.CompletedTask;
         }
     };
-})
-.AddCookie("External")
-.AddGoogle("Google", options =>
-{
-    options.SignInScheme = "External";
-    options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? string.Empty;
-    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
-    options.SaveTokens = true;
-    options.Scope.Add("profile");
-    options.Scope.Add("email");
 });
 
 builder.Services.AddAuthorization();
