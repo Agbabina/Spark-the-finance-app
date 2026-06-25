@@ -27,6 +27,7 @@ function App() {
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
     const [username, setUsername] = useState<string>("");
     const [globalError, setGlobalError] = useState<string>("");
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
     const decodeTokenUsername = (token: string) => {
         try {
@@ -62,6 +63,7 @@ function App() {
         if (savedUsername) {
             setUsername(savedUsername);
         }
+        setIsLoading(false);
     }, []);
 
     useEffect(() => {
@@ -129,47 +131,18 @@ function App() {
         <ThemeProvider>
             <BrowserRouter>
                 <Routes>
-                    {/* Root path redirect logic */}
+                    <Route
+                        path="/landing"
+                        element={isLoading ? null : <LandingPage />}
+                    />
                     <Route
                         path="/"
                         element={
-                            isLoggedIn ? (
-                                <Navigate to="/transactions" replace />
-                            ) : (
-                                <Navigate to="/landing" replace />
-                            )
-                        }
-                    />
-
-                    {/* Landing Page: If already logged in, redirect away to transactions */}
-                    <Route
-                        path="/landing"
-                        element={
-                            isLoggedIn ? (
-                                <Navigate to="/transactions" replace />
-                            ) : (
-                                <LandingPage />
-                            )
-                        }
-                    />
-
-                    {/* Login Page: If already logged in, redirect away to transactions */}
-                    <Route
-                        path="/login"
-                        element={
-                            isLoggedIn ? (
-                                <Navigate to="/transactions" replace />
-                            ) : (
-                                <LoginPage setIsLoggedIn={setIsLoggedIn} setUsername={setUsername} />
-                            )
-                        }
-                    />
-
-                    {/* Protected Routes with Sidebar Layout wrapped inside them */}
-                    <Route
-                        path="/add"
-                        element={
-                            isLoggedIn ? (
+                            isLoading ? (
+                                <div className="min-h-screen flex items-center justify-center bg-slate-950">
+                                    <div className="text-slate-400">Loading...</div>
+                                </div>
+                            ) : isLoggedIn ? (
                                 <div className={`${darkMode ? "dark" : ""} app-shell`}>
                                     <Sidebar
                                         transactions={transactions}
@@ -181,6 +154,35 @@ function App() {
                                         devError={globalError}
                                         onLogout={logout}
                                     />
+                                </div>
+                            ) : (
+                                <Navigate to="/landing" replace />
+                            )
+                        }
+                    />
+                    <Route
+                        path="/login"
+                        element={
+                            isLoading ? (
+                                <div className="min-h-screen flex items-center justify-center bg-slate-950">
+                                    <div className="text-slate-400">Loading...</div>
+                                </div>
+                            ) : isLoggedIn ? (
+                                <Navigate to="/" replace />
+                            ) : (
+                                <LoginPage setIsLoggedIn={setIsLoggedIn} setUsername={setUsername} />
+                            )
+                        }
+                    />
+                    <Route
+                        path="/add"
+                        element={
+                            isLoading ? (
+                                <div className="min-h-screen flex items-center justify-center bg-slate-950">
+                                    <div className="text-slate-400">Loading...</div>
+                                </div>
+                            ) : isLoggedIn ? (
+                                <div className={`${darkMode ? "dark" : ""} app-shell`}>
                                     <AddTransaction
                                         setTransactions={setTransactions}
                                         darkMode={darkMode}
@@ -196,18 +198,12 @@ function App() {
                     <Route
                         path="/transactions"
                         element={
-                            isLoggedIn ? (
+                            isLoading ? (
+                                <div className="min-h-screen flex items-center justify-center bg-slate-950">
+                                    <div className="text-slate-400">Loading...</div>
+                                </div>
+                            ) : isLoggedIn ? (
                                 <div className={`${darkMode ? "dark" : ""} app-shell`}>
-                                    <Sidebar
-                                        transactions={transactions}
-                                        budgets={budgets}
-                                        goals={goals}
-                                        darkMode={darkMode}
-                                        setDarkMode={setDarkMode}
-                                        username={username}
-                                        devError={globalError}
-                                        onLogout={logout}
-                                    />
                                     <Transactions
                                         transactions={transactions}
                                         username={username}
@@ -221,18 +217,12 @@ function App() {
                     <Route
                         path="/budgets"
                         element={
-                            isLoggedIn ? (
+                            isLoading ? (
+                                <div className="min-h-screen flex items-center justify-center bg-slate-950">
+                                    <div className="text-slate-400">Loading...</div>
+                                </div>
+                            ) : isLoggedIn ? (
                                 <div className={`${darkMode ? "dark" : ""} app-shell`}>
-                                    <Sidebar
-                                        transactions={transactions}
-                                        budgets={budgets}
-                                        goals={goals}
-                                        darkMode={darkMode}
-                                        setDarkMode={setDarkMode}
-                                        username={username}
-                                        devError={globalError}
-                                        onLogout={logout}
-                                    />
                                     <Budgets
                                         budgets={budgets}
                                         transactions={transactions}
@@ -249,18 +239,12 @@ function App() {
                     <Route
                         path="/goals"
                         element={
-                            isLoggedIn ? (
+                            isLoading ? (
+                                <div className="min-h-screen flex items-center justify-center bg-slate-950">
+                                    <div className="text-slate-400">Loading...</div>
+                                </div>
+                            ) : isLoggedIn ? (
                                 <div className={`${darkMode ? "dark" : ""} app-shell`}>
-                                    <Sidebar
-                                        transactions={transactions}
-                                        budgets={budgets}
-                                        goals={goals}
-                                        darkMode={darkMode}
-                                        setDarkMode={setDarkMode}
-                                        username={username}
-                                        devError={globalError}
-                                        onLogout={logout}
-                                    />
                                     <Goals
                                         goals={goals}
                                         setGoals={setGoals}
@@ -276,18 +260,12 @@ function App() {
                     <Route
                         path="/spark-connect"
                         element={
-                            isLoggedIn ? (
+                            isLoading ? (
+                                <div className="min-h-screen flex items-center justify-center bg-slate-950">
+                                    <div className="text-slate-400">Loading...</div>
+                                </div>
+                            ) : isLoggedIn ? (
                                 <div className={`${darkMode ? "dark" : ""} app-shell`}>
-                                    <Sidebar
-                                        transactions={transactions}
-                                        budgets={budgets}
-                                        goals={goals}
-                                        darkMode={darkMode}
-                                        setDarkMode={setDarkMode}
-                                        username={username}
-                                        devError={globalError}
-                                        onLogout={logout}
-                                    />
                                     <SparkConnect />
                                 </div>
                             ) : (
@@ -298,18 +276,12 @@ function App() {
                     <Route
                         path="/connections"
                         element={
-                            isLoggedIn ? (
+                            isLoading ? (
+                                <div className="min-h-screen flex items-center justify-center bg-slate-950">
+                                    <div className="text-slate-400">Loading...</div>
+                                </div>
+                            ) : isLoggedIn ? (
                                 <div className={`${darkMode ? "dark" : ""} app-shell`}>
-                                    <Sidebar
-                                        transactions={transactions}
-                                        budgets={budgets}
-                                        goals={goals}
-                                        darkMode={darkMode}
-                                        setDarkMode={setDarkMode}
-                                        username={username}
-                                        devError={globalError}
-                                        onLogout={logout}
-                                    />
                                     <Connections />
                                 </div>
                             ) : (
@@ -317,9 +289,6 @@ function App() {
                             )
                         }
                     />
-
-                    {/* Catch-all fallback redirect */}
-                    <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </BrowserRouter>
         </ThemeProvider>
