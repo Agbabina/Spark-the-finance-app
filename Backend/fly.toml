@@ -1,4 +1,4 @@
-app = "massive-project"
+app = "spark-the-finance-app"
 primary_region = "lhr"
 
 [build]
