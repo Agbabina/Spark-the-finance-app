@@ -12,8 +12,8 @@ import LoginPage from "./Pages/LoginPage";
 import SparkConnect from "./Pages/SparkConnect";
 import Connections from "./Pages/Connections";
 import LandingPage from "./Pages/LandingPage";
-import "./App.css"
-import type {Budget, Goal, Transaction} from "./types";
+import "./App.css";
+import type { Budget, Goal, Transaction } from "./types";
 import { api, setApiAuthToken } from "./lib/api";
 
 function App() {
@@ -129,12 +129,45 @@ function App() {
         <ThemeProvider>
             <BrowserRouter>
                 <Routes>
-                    <Route
-                        path="/landing"
-                        element={<LandingPage />}
-                    />
+                    {/* Root path redirect logic */}
                     <Route
                         path="/"
+                        element={
+                            isLoggedIn ? (
+                                <Navigate to="/transactions" replace />
+                            ) : (
+                                <Navigate to="/landing" replace />
+                            )
+                        }
+                    />
+
+                    {/* Landing Page: If already logged in, redirect away to transactions */}
+                    <Route
+                        path="/landing"
+                        element={
+                            isLoggedIn ? (
+                                <Navigate to="/transactions" replace />
+                            ) : (
+                                <LandingPage />
+                            )
+                        }
+                    />
+
+                    {/* Login Page: If already logged in, redirect away to transactions */}
+                    <Route
+                        path="/login"
+                        element={
+                            isLoggedIn ? (
+                                <Navigate to="/transactions" replace />
+                            ) : (
+                                <LoginPage setIsLoggedIn={setIsLoggedIn} setUsername={setUsername} />
+                            )
+                        }
+                    />
+
+                    {/* Protected Routes with Sidebar Layout wrapped inside them */}
+                    <Route
+                        path="/add"
                         element={
                             isLoggedIn ? (
                                 <div className={`${darkMode ? "dark" : ""} app-shell`}>
@@ -148,110 +181,146 @@ function App() {
                                         devError={globalError}
                                         onLogout={logout}
                                     />
+                                    <AddTransaction
+                                        setTransactions={setTransactions}
+                                        darkMode={darkMode}
+                                        username={username}
+                                        setGlobalError={setGlobalError}
+                                    />
                                 </div>
                             ) : (
-                                <LandingPage />
+                                <Navigate to="/login" replace />
                             )
                         }
                     />
-                <Route
-                    path="/login"
-                    element={
-                        <LoginPage setIsLoggedIn={setIsLoggedIn} setUsername={setUsername} />
-                    }
-                />
-                <Route
-                    path="/add"
-                    element={
-                        isLoggedIn ? (
-                            <div className={`${darkMode ? "dark" : ""} app-shell`}>
-                                <AddTransaction
-                                    setTransactions={setTransactions}
-                                    darkMode={darkMode}
-                                    username={username}
-                                    setGlobalError={setGlobalError}
-                                />
-                            </div>
-                        ) : (
-                            <Navigate to="/login" replace />
-                        )
-                    }
-                />
-                <Route
-                    path="/transactions"
-                    element={
-                        isLoggedIn ? (
-                            <div className={`${darkMode ? "dark" : ""} app-shell`}>
-                                <Transactions
-                                    transactions={transactions}
-                                    username={username}
-                                />
-                            </div>
-                        ) : (
-                            <Navigate to="/login" replace />
-                        )
-                    }
-                />
-                <Route
-                    path="/budgets"
-                    element={
-                        isLoggedIn ? (
-                            <div className={`${darkMode ? "dark" : ""} app-shell`}>
-                                <Budgets
-                                    budgets={budgets}
-                                    transactions={transactions}
-                                    username={username}
-                                    setBudgets={setBudgets}
-                                    setGlobalError={setGlobalError}
-                                />
-                            </div>
-                        ) : (
-                            <Navigate to="/login" replace />
-                        )
-                    }
-                />
-                <Route
-                    path="/goals"
-                    element={
-                        isLoggedIn ? (
-                            <div className={`${darkMode ? "dark" : ""} app-shell`}>
-                                <Goals
-                                    goals={goals}
-                                    setGoals={setGoals}
-                                    setGlobalError={setGlobalError}
-                                    username={username}
-                                />
-                            </div>
-                        ) : (
-                            <Navigate to="/login" replace />
-                        )
-                    }
-                />
-                <Route
-                    path="/spark-connect"
-                    element={
-                        isLoggedIn ? (
-                            <div className={`${darkMode ? "dark" : ""} app-shell`}>
-                                <SparkConnect />
-                            </div>
-                        ) : (
-                            <Navigate to="/login" replace />
-                        )
-                    }
-                />
-                <Route
-                    path="/connections"
-                    element={
-                        isLoggedIn ? (
-                            <div className={`${darkMode ? "dark" : ""} app-shell`}>
-                                <Connections />
-                            </div>
-                        ) : (
-                            <Navigate to="/login" replace />
-                        )
-                    }
-                />
-            </Routes>
+                    <Route
+                        path="/transactions"
+                        element={
+                            isLoggedIn ? (
+                                <div className={`${darkMode ? "dark" : ""} app-shell`}>
+                                    <Sidebar
+                                        transactions={transactions}
+                                        budgets={budgets}
+                                        goals={goals}
+                                        darkMode={darkMode}
+                                        setDarkMode={setDarkMode}
+                                        username={username}
+                                        devError={globalError}
+                                        onLogout={logout}
+                                    />
+                                    <Transactions
+                                        transactions={transactions}
+                                        username={username}
+                                    />
+                                </div>
+                            ) : (
+                                <Navigate to="/login" replace />
+                            )
+                        }
+                    />
+                    <Route
+                        path="/budgets"
+                        element={
+                            isLoggedIn ? (
+                                <div className={`${darkMode ? "dark" : ""} app-shell`}>
+                                    <Sidebar
+                                        transactions={transactions}
+                                        budgets={budgets}
+                                        goals={goals}
+                                        darkMode={darkMode}
+                                        setDarkMode={setDarkMode}
+                                        username={username}
+                                        devError={globalError}
+                                        onLogout={logout}
+                                    />
+                                    <Budgets
+                                        budgets={budgets}
+                                        transactions={transactions}
+                                        username={username}
+                                        setBudgets={setBudgets}
+                                        setGlobalError={setGlobalError}
+                                    />
+                                </div>
+                            ) : (
+                                <Navigate to="/login" replace />
+                            )
+                        }
+                    />
+                    <Route
+                        path="/goals"
+                        element={
+                            isLoggedIn ? (
+                                <div className={`${darkMode ? "dark" : ""} app-shell`}>
+                                    <Sidebar
+                                        transactions={transactions}
+                                        budgets={budgets}
+                                        goals={goals}
+                                        darkMode={darkMode}
+                                        setDarkMode={setDarkMode}
+                                        username={username}
+                                        devError={globalError}
+                                        onLogout={logout}
+                                    />
+                                    <Goals
+                                        goals={goals}
+                                        setGoals={setGoals}
+                                        setGlobalError={setGlobalError}
+                                        username={username}
+                                    />
+                                </div>
+                            ) : (
+                                <Navigate to="/login" replace />
+                            )
+                        }
+                    />
+                    <Route
+                        path="/spark-connect"
+                        element={
+                            isLoggedIn ? (
+                                <div className={`${darkMode ? "dark" : ""} app-shell`}>
+                                    <Sidebar
+                                        transactions={transactions}
+                                        budgets={budgets}
+                                        goals={goals}
+                                        darkMode={darkMode}
+                                        setDarkMode={setDarkMode}
+                                        username={username}
+                                        devError={globalError}
+                                        onLogout={logout}
+                                    />
+                                    <SparkConnect />
+                                </div>
+                            ) : (
+                                <Navigate to="/login" replace />
+                            )
+                        }
+                    />
+                    <Route
+                        path="/connections"
+                        element={
+                            isLoggedIn ? (
+                                <div className={`${darkMode ? "dark" : ""} app-shell`}>
+                                    <Sidebar
+                                        transactions={transactions}
+                                        budgets={budgets}
+                                        goals={goals}
+                                        darkMode={darkMode}
+                                        setDarkMode={setDarkMode}
+                                        username={username}
+                                        devError={globalError}
+                                        onLogout={logout}
+                                    />
+                                    <Connections />
+                                </div>
+                            ) : (
+                                <Navigate to="/login" replace />
+                            )
+                        }
+                    />
+
+                    {/* Catch-all fallback redirect */}
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
             </BrowserRouter>
         </ThemeProvider>
     );
