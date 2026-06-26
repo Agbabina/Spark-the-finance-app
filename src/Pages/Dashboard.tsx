@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { LuBadgeCheck, LuBrainCircuit, LuSend, LuSparkles, LuTriangleAlert, LuWifiOff } from "react-icons/lu";
-import { BiPlus, BiWallet, BiCreditCard } from "react-icons/bi";
+import { MdTrendingDown, MdTrendingUp } from "react-icons/md";
+import { BiWallet, BiCreditCard } from "react-icons/bi";
 import { useNavigate } from "react-router-dom";
 import {
     LineChart,
@@ -38,7 +39,7 @@ const sameMonth = (date: string) => {
 
 function Dashboard() {
     const navigate = useNavigate();
-    const { transactions, budgets, goals, username } = useAppData();
+    const { transactions, budgets, goals } = useAppData();
 
     const formatCurrency = (value: number) => `NGN ${value.toLocaleString()}`;
 
@@ -74,22 +75,6 @@ function Dashboard() {
 
     const currentMonth = new Date().getMonth() + 1;
     const currentBudgets = budgets.filter((budget) => budget.month === currentMonth && budget.year === new Date().getFullYear());
-    const currentBudgetLimit = currentBudgets.reduce((sum, budget) => sum + budget.limit, 0);
-    const currentBudgetSpent = currentBudgets.reduce((sum, budget) => {
-        const spent = transactions
-            .filter(
-                (transaction) =>
-                    transaction.type === "expense" &&
-                    transaction.category === budget.category &&
-                    new Date(transaction.date).getMonth() + 1 === budget.month &&
-                    new Date(transaction.date).getFullYear() === budget.year
-            )
-            .reduce((transactionSum, transaction) => transactionSum + transaction.amount, 0);
-        return sum + spent;
-    }, 0);
-
-    const totalGoalTarget = goals.reduce((sum, goal) => sum + goal.targetAmount, 0);
-    const totalGoalSaved = goals.reduce((sum, goal) => sum + goal.currentAmount, 0);
     const currentMonthExpenses = transactions
         .filter((transaction) => transaction.type === "expense" && sameMonth(transaction.date))
         .reduce((sum, transaction) => sum + transaction.amount, 0);
@@ -304,7 +289,7 @@ function Dashboard() {
                 </div>
 
                 <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-                    {smartInsights.map((insight, index) => (
+                    {smartInsights.map((insight) => (
                         <div key={insight.title} className={`rounded-2xl border p-4 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 ${toneClasses[insight.tone]}`}>
                             <p className="text-xs font-semibold uppercase tracking-[0.18em] opacity-70">
                                 {insight.title}
