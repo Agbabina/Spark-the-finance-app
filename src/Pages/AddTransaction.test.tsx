@@ -3,6 +3,7 @@ import { MemoryRouter } from "react-router-dom";
 import { vi } from "vitest";
 import AddTransaction from "./AddTransaction";
 import { api } from "../lib/api";
+import { AppDataProvider } from "../contexts/AppDataContext";
 
 describe("AddTransaction", () => {
   beforeEach(() => {
@@ -14,12 +15,11 @@ describe("AddTransaction", () => {
     const mockPost = vi.spyOn(api, "post").mockResolvedValue({ data: { id: 1, title: "T", amount: 100 } });
     localStorage.setItem("token", "test-token");
 
-    const setTransactions = vi.fn();
-    const setGlobalError = vi.fn();
-
     render(
       <MemoryRouter>
-        <AddTransaction setTransactions={setTransactions} darkMode={false} username={"user"} setGlobalError={setGlobalError} />
+        <AppDataProvider>
+          <AddTransaction />
+        </AppDataProvider>
       </MemoryRouter>
     );
 
@@ -36,7 +36,6 @@ describe("AddTransaction", () => {
 
     const call = mockPost.mock.calls[0];
     expect(call[0]).toBe("/api/transactions");
-    // Authorization should be attached to the api defaults by the app
     expect(api.defaults.headers.common.Authorization).toBe(`Bearer ${localStorage.getItem("token")}`);
   });
 });

@@ -2,14 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LuShare2 } from "react-icons/lu";
 import axios from "axios";
-//Transactions b
-import { api, setApiAuthToken } from "../lib/api";
-import type { Transaction } from "../types";
 
-interface Props {
-    transactions: Transaction[];
-    username: string;
-}
+import { api, setApiAuthToken } from "../lib/api";
+import { useAppData } from "../contexts/AppDataContext";
+import type { Transaction } from "../types";
 
 type ShareState = {
     transactionId: number;
@@ -20,8 +16,9 @@ type ShareState = {
     success: boolean;
 };
 
-function Transactions({ transactions, username }: Props) {
+function Transactions() {
     const navigate = useNavigate();
+    const { transactions, username } = useAppData();
     const [openShareId, setOpenShareId] = useState<number | null>(null);
     const [shareState, setShareState] = useState<ShareState | null>(null);
 

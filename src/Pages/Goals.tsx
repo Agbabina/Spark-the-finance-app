@@ -5,21 +5,16 @@ import axios from "axios";
 import Input from "../Components/Input";
 import TrophyAnimation from "../Components/TrophyAnimation";
 import { api, setApiAuthToken } from "../lib/api";
+import { useAppData } from "../contexts/AppDataContext";
 import type { Goal } from "../types";
-
-interface Props {
-    goals: Goal[];
-    setGoals: React.Dispatch<React.SetStateAction<Goal[]>>;
-    setGlobalError: React.Dispatch<React.SetStateAction<string>>;
-    username: string;
-}
 
 function formatCurrency(value: number) {
     return `NGN ${value.toLocaleString()}`;
 }
 
-function Goals({ goals, setGoals, setGlobalError, username }: Props) {
+function Goals() {
     const navigate = useNavigate();
+    const { goals, setGoals, setGlobalError, username } = useAppData();
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [completedGoalTitle, setCompletedGoalTitle] = useState<string | null>(null);

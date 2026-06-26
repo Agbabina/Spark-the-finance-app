@@ -12,6 +12,7 @@ interface AppDataContextValue {
     setGlobalError: React.Dispatch<React.SetStateAction<string>>;
     globalError: string;
     username: string;
+    setUsername: React.Dispatch<React.SetStateAction<string>>;
     onLogout: () => void;
     fetchTransactions: () => Promise<void>;
     fetchBudgets: () => Promise<void>;
@@ -33,6 +34,9 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         setApiAuthToken(null);
         setUsername("");
         setGlobalError("");
+        setTransactions([]);
+        setBudgets([]);
+        setGoals([]);
     };
 
     const fetchTransactions = async () => {
@@ -80,9 +84,6 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         const savedUsername = localStorage.getItem("username");
         setApiAuthToken(token);
         if (savedUsername) setUsername(savedUsername);
-        if (token) {
-            fetchAppData();
-        }
     }, []);
 
     return (
@@ -97,6 +98,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
                 setGlobalError,
                 globalError,
                 username,
+                setUsername,
                 onLogout: logout,
                 fetchTransactions,
                 fetchBudgets,
@@ -111,7 +113,22 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
 export function useAppData() {
     const ctx = useContext(AppDataContext);
     if (!ctx) {
-        throw new Error("useAppData must be used within AppDataProvider");
+        return {
+            transactions: [],
+            budgets: [],
+            goals: [],
+            setTransactions: () => {},
+            setBudgets: () => {},
+            setGoals: () => {},
+            setGlobalError: () => {},
+            globalError: "",
+            username: "",
+            setUsername: () => {},
+            onLogout: () => {},
+            fetchTransactions: async () => {},
+            fetchBudgets: async () => {},
+            fetchGoals: async () => {},
+        };
     }
     return ctx;
 }

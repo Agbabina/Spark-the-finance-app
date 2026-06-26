@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import Input from "../Components/Input";
-import type { Transaction } from "../types.ts";
 import { api, setApiAuthToken } from "../lib/api";
 import { expenseCategories } from "../lib/categories";
+import { useAppData } from "../contexts/AppDataContext";
+import type { Transaction } from "../types";
 
 // JWT helpers
 interface JwtPayload {
@@ -38,15 +39,9 @@ function isTokenExpired(token: string | null) {
     return payload.exp < now;
 }
 
-interface Props {
-    setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>;
-    darkMode: boolean;
-    username: string;
-    setGlobalError: React.Dispatch<React.SetStateAction<string>>;
-}
-
-function AddTransaction({ setTransactions, darkMode: _darkMode, username, setGlobalError }: Props) {
+function AddTransaction() {
     const navigate = useNavigate();
+    const { setTransactions, setGlobalError, username } = useAppData();
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
 

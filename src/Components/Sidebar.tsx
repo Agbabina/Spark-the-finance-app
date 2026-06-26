@@ -2,7 +2,7 @@ import { type FormEvent, useMemo, useState, useEffect } from "react";
 import { LuBadgeCheck, LuBrainCircuit, LuMenu, LuSend, LuSparkles, LuTriangleAlert, LuWifiOff, LuUsers } from "react-icons/lu";
 import { MdBalance, MdTrendingDown, MdTrendingUp } from "react-icons/md";
 import { GrTransaction } from "react-icons/gr";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { BiPlus, BiWallet, BiCreditCard } from "react-icons/bi";
 import { MdAccountBalanceWallet } from "react-icons/md";
 import { BsBullseye } from "react-icons/bs";
@@ -18,26 +18,16 @@ import {
     Cell
 } from "recharts";
 
-import type { Transaction } from "../types.ts";
-import type { AiInsight, AiQuestionResponse, Budget, Goal } from "../types.ts";
+import type { Transaction, AiInsight, AiQuestionResponse, Budget, Goal } from "../types.ts";
 import { api } from "../lib/api.ts";
+import { useAppData } from "../contexts/AppDataContext";
+import { useTheme } from "../contexts/ThemeContext";
 
 interface SmartInsight {
     title: string;
     value: string;
     detail: string;
     tone: "blue" | "emerald" | "amber" | "rose" | "slate";
-}
-
-interface Props {
-    transactions: Transaction[];
-    budgets: Budget[];
-    goals: Goal[];
-    darkMode: boolean;
-    setDarkMode: (value: boolean) => void;
-    username: string;
-    devError: string;
-    onLogout: () => void;
 }
 
 const daysInCurrentMonth = () => {
@@ -70,7 +60,7 @@ const sameMonth = (date: string) => {
     return parsed.getMonth() === now.getMonth() && parsed.getFullYear() === now.getFullYear();
 };
 
-function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username, devError, onLogout }: Props) {
+function Sidebar() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [aiInsight, setAiInsight] = useState<AiInsight | null>(null);
     const [aiLoading, setAiLoading] = useState(false);
@@ -79,6 +69,8 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
     const [onlineAnswer, setOnlineAnswer] = useState("");
     const [onlineQuestionLoading, setOnlineQuestionLoading] = useState(false);
     const [mounted, setMounted] = useState(false);
+    const { theme, toggleTheme } = useTheme();
+    const { transactions, budgets, goals, username, globalError, onLogout } = useAppData();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -431,10 +423,10 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
                             </div>
 
                             <button
-                                onClick={() => setDarkMode(!darkMode)}
+                                onClick={toggleTheme}
                                 className="btn-secondary w-auto px-4 py-2 text-sm transition-all duration-300 hover:shadow-md"
                             >
-                                {darkMode ? "Light mode" : "Dark mode"}
+                                {theme === "dark" ? "Light mode" : "Dark mode"}
                             </button>
                         </div>
 
@@ -992,12 +984,16 @@ function Sidebar({ transactions, budgets, goals, darkMode, setDarkMode, username
                                     ))}
                                 </div>
                             )}
-                        </section>
-                    </div>
-                </main>
-            </div>
+</section>
+                     </div>
+                 </main>
 
-            {isSidebarOpen && (
+                 <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+                     <Outlet />
+                 </main>
+             </div>
+
+             {isSidebarOpen && (
                 <div
                     className="fixed inset-0 z-40 bg-slate-950/50 backdrop-blur-sm lg:hidden animate-fade-in"
                     onClick={() => setIsSidebarOpen(false)}
