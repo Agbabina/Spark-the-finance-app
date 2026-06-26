@@ -1,14 +1,15 @@
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 import "./index.css";
-import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import { AppDataProvider, useAppData } from "./contexts/AppDataContext";
 import Sidebar from "./Components/Sidebar";
 import AddTransaction from "./Pages/AddTransaction";
 import Transactions from "./Pages/Transactions";
 import Budgets from "./Pages/Budgets";
 import Goals from "./Pages/Goals";
+import Dashboard from "./Pages/Dashboard";
 import LoginPage from "./Pages/LoginPage";
 import SparkConnect from "./Pages/SparkConnect";
 import Connections from "./Pages/Connections";
@@ -98,7 +99,7 @@ function AppInner() {
                     )
                 }
             >
-                <Route index element={<Navigate to="/transactions" replace />} />
+                <Route index element={<Dashboard />} />
                 <Route path="transactions" element={<Transactions />} />
                 <Route path="add" element={<AddTransaction />} />
                 <Route path="budgets" element={<Budgets />} />
@@ -112,12 +113,9 @@ function AppInner() {
 }
 
 function AppLayout() {
-    const { theme } = useTheme();
-
     return (
-        <div className={`${theme === "dark" ? "dark" : ""} app-shell`}>
+        <div className="app-shell">
             <Sidebar />
-            <Outlet />
         </div>
     );
 }

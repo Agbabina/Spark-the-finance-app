@@ -1,15 +1,27 @@
-import { useMemo, useState, useEffect } from "react";
-import { LuBadgeCheck, LuBrainCircuit, LuMenu, LuSend, LuSparkles, LuTriangleAlert, LuWifiOff, LuUsers } from "react-icons/lu";
+import { type FormEvent, useMemo, useState, useEffect } from "react";
+import { LuBadgeCheck, LuBrainCircuit, LuMenu, LuSend, LuSparkles, LuTriangleAlert, LuWifiOff, LuUsers, LuLoader } from "react-icons/lu";
 import { MdBalance, MdTrendingDown, MdTrendingUp } from "react-icons/md";
 import { GrTransaction } from "react-icons/gr";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { BiPlus, BiWallet, BiCreditCard } from "react-icons/bi";
 import { MdAccountBalanceWallet } from "react-icons/md";
 import { BsBullseye } from "react-icons/bs";
+import {
+    LineChart,
+    Line,
+    XAxis,
+    YAxis,
+    Tooltip,
+    ResponsiveContainer,
+    PieChart,
+    Pie,
+    Cell
+} from "recharts";
 
-import type { Transaction } from "../types.ts";
+import type { Transaction, AiInsight, AiQuestionResponse } from "../types.ts";
 import { useAppData } from "../contexts/AppDataContext";
 import { useTheme } from "../contexts/ThemeContext";
+import { api } from "../lib/api";
 
 interface SmartInsight {
     title: string;
@@ -131,6 +143,182 @@ function Sidebar() {
     const projectedMonthExpenses = monthProgress > 0 ? currentMonthExpenses / monthProgress : currentMonthExpenses;
     const projectedBalance = currentMonthIncome - projectedMonthExpenses;
     const savingsRate = currentMonthIncome > 0 ? ((currentMonthIncome - currentMonthExpenses) / currentMonthIncome) * 100 : 0;
+
+    const [coachQuestion, setCoachQuestion] = useState("");
+    const [coachAnswer, setCoachAnswer] = useState("Ask about spending, budgets, subscriptions, forecasts, goals, or categories. This assistant works offline.");
+    const [onlineQuestion, setOnlineQuestion] = useState("");
+    const [onlineAnswer, setOnlineAnswer] = useState("");
+    const [onlineQuestionLoading, setOnlineQuestionLoading] = useState(false);
+    const [aiInsight, setAiInsight] = useState<AiInsight | null>(null);
+    const [aiLoading, setAiLoading] = useState(false);
+    const [aiError, setAiError] = useState("");
+
+    const duplicateCharges = useMemo(() => {
+        const seen = new Map<string, Transaction[]>();
+        transactions
+            .filter((transaction) => transaction.type === "expense")
+            .forEach((transaction) => {
+                const key = `${normalize(transaction.title)}-${transaction.amount}-${transaction.date}`;
+                seen.set(key, [...(seen.get(key) ?? []), transaction]);
+            });
+
+        return Array.from(seen.values()).filter((group) => group.length > 1).slice(0, 3);
+    }, [transactions]);
+
+    const subscriptionHints = useMemo(() => {
+        const groups = new Map<string, Transaction[]>();
+        transactions
+            .filter((transaction) => transaction.type === "expense")
+            .forEach((transaction) => {
+                const title = normalize(transaction.title);
+                const looksRecurring = ["subscription", "netflix", "spotify", "internet", "prime", "youtube", "apple"]
+                    .some((keyword) => title.includes(keyword));
+                if (looksRecurring || transaction.category === "Subscriptions" || transaction.category === "Bills") {
+                    groups.set(title, [...(groups.get(title) ?? []), transaction]);
+                }
+            });
+
+        return Array.from(groups.values())
+            .filter((group) => group.length >= 1)
+            .sort((a, b) => b.length - a.length)
+            .slice(0, 4);
+    }, [transactions]);
+
+    const categorySuggestions = useMemo(() => (
+        transactions
+            .filter((transaction) => transaction.type === "expense" && (!transaction.category || transaction.category === "Other"))
+            .slice(-5)
+            .map((transaction) => ({
+                transaction,
+                suggestion: guessCategory(transaction.title)
+            }))
+            .filter(({ suggestion }) => suggestion !== "Other")
+    ), [transactions]);
+
+    const budgetSuggestions = useMemo(() => {
+        const monthlyByCategory = new Map<string, number[]>();
+        transactions
+            .filter((transaction) => transaction.type === "expense" && transaction.category)
+            .forEach((transaction) => {
+                const date = new Date(transaction.date);
+                const key = `${date.getFullYear()}-${date.getMonth() + 1}`;
+                const categoryKey = `${transaction.category}|${key}`;
+                const current = monthlyByCategory.get(categoryKey)?.[0] ?? 0;
+                monthlyByCategory.set(categoryKey, [current + transaction.amount]);
+            });
+
+        const categoryTotals = new Map<string, number[]>();
+        monthlyByCategory.forEach((totals, key) => {
+            const category = key.split("|")[0];
+            categoryTotals.set(category, [...(categoryTotals.get(category) ?? []), totals[0]]);
+        });
+
+        return Array.from(categoryTotals.entries())
+            .map(([category, totals]) => ({
+                category,
+                amount: Math.ceil((totals.reduce((sum, value) => sum + value, 0) / totals.length) * 1.05)
+            }))
+            .sort((a, b) => b.amount - a.amount)
+            .slice(0, 4);
+    }, [transactions]);
+
+    const answerOfflineQuestion = (question: string) => {
+        const text = normalize(question);
+        const topCategory = pieData.slice().sort((a, b) => b.value - a.value)[0];
+
+        if (!text) {
+            return "Type a finance question first. I can answer offline without touching your data plan.";
+        }
+
+        if (text.includes("forecast") || text.includes("end") || text.includes("month")) {
+            return `Offline forecast: you have spent ${formatCurrency(currentMonthExpenses)} this month. At this pace, expenses may land around ${formatCurrency(projectedMonthExpenses)}, leaving an estimated balance of ${formatCurrency(Math.abs(projectedBalance))}${projectedBalance >= 0 ? "." : " short."}`;
+        }
+
+        if (text.includes("cut") || text.includes("reduce") || text.includes("save")) {
+            return topCategory
+                ? `Start with ${topCategory.name}. A 20% reduction there would free about ${formatCurrency(topCategory.value * 0.2)} based on recorded spending.`
+                : "Add a few categorized expenses first, then I can show the easiest category to cut.";
+        }
+
+        if (text.includes("budget")) {
+            return budgetSuggestions.length > 0
+                ? `Suggested next budgets: ${budgetSuggestions.map((item) => `${item.category} ${formatCurrency(item.amount)}`).join(", ")}. These are calculated locally from your past category totals.`
+                : "I need categorized expenses before I can suggest reliable budgets.";
+        }
+
+        if (text.includes("subscription") || text.includes("recurring")) {
+            return subscriptionHints.length > 0
+                ? `Possible recurring charges: ${subscriptionHints.map((group) => `${group[0].title} (${formatCurrency(group[0].amount)})`).join(", ")}.`
+                : "I did not find obvious subscriptions yet. Label subscriptions or bills to improve detection.";
+        }
+
+        if (text.includes("duplicate") || text.includes("double")) {
+            return duplicateCharges.length > 0
+                ? `Possible duplicates: ${duplicateCharges.map((group) => `${group[0].title} on ${group[0].date}`).join(", ")}.`
+                : "No same-day duplicate charges found offline.";
+        }
+
+        if (text.includes("goal")) {
+            const nextGoal = goals.find((goal) => goal.targetAmount > goal.currentAmount);
+            return nextGoal
+                ? `${nextGoal.title} needs ${formatCurrency(nextGoal.targetAmount - nextGoal.currentAmount)} more. Your current balance is ${formatCurrency(Math.abs(balance))}${balance >= 0 ? ", so consider moving a fixed amount after each income entry." : ", so stabilize cash flow before adding more."}`
+                : "Add a savings goal and I can calculate the remaining amount and monthly pace.";
+        }
+
+        if (text.includes("category") || text.includes("categor")) {
+            return categorySuggestions.length > 0
+                ? `Category ideas: ${categorySuggestions.map(({ transaction, suggestion }) => `${transaction.title} -> ${suggestion}`).join(", ")}.`
+                : topCategory
+                    ? `${topCategory.name} is currently your largest expense category.`
+                    : "No category suggestions yet.";
+        }
+
+        return topCategory
+            ? `Quick offline read: balance is ${formatCurrency(Math.abs(balance))}${balance >= 0 ? "" : " short"}, top spending is ${topCategory.name}, and projected monthly expenses are ${formatCurrency(projectedMonthExpenses)}.`
+            : `Quick offline read: balance is ${formatCurrency(Math.abs(balance))}. Add categorized transactions for sharper answers.`;
+    };
+
+    const handleCoachSubmit = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        setCoachAnswer(answerOfflineQuestion(coachQuestion));
+    };
+
+    const handleOnlineQuestionSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const question = onlineQuestion.trim();
+        if (!question) {
+            setOnlineAnswer("Ask a question first.");
+            return;
+        }
+
+        setOnlineQuestionLoading(true);
+        setAiError("");
+
+        try {
+            const response = await api.post<AiQuestionResponse>("/api/ai/ask", { question });
+            setOnlineAnswer(response.data.answer);
+        } catch (error: unknown) {
+            console.error("Error asking online AI:", error);
+            setAiError("Online AI could not answer right now.");
+        } finally {
+            setOnlineQuestionLoading(false);
+        }
+    };
+
+    const generateAiInsight = async () => {
+        setAiLoading(true);
+        setAiError("");
+
+        try {
+            const response = await api.post<AiInsight>("/api/ai/insights");
+            setAiInsight(response.data);
+        } catch (error: unknown) {
+            console.error("Error generating AI insight:", error);
+            setAiError("AI insight could not be generated right now.");
+        } finally {
+            setAiLoading(false);
+        }
+    };
 
     const COLORS = ["#2563eb", "#7c3aed", "#10b981", "#f59e0b", "#ef4444"];
 
@@ -394,6 +582,375 @@ function Sidebar() {
                 </header>
 
                 <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+                    <div className="mx-auto max-w-7xl space-y-6">
+                        <section className="grid gap-4 sm:grid-cols-3">
+                            <div className={`card border-l-4 border-l-blue-500 p-6 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-0.5 ${mounted ? 'animate-slide-up stagger-1' : 'opacity-0'}`}>
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                                            Total Balance
+                                        </p>
+                                        <p className={`mt-2 text-2xl font-black transition-colors duration-200 ${balance >= 0 ? "text-emerald-600 dark:text-emerald-300" : "text-rose-600 dark:text-rose-300"}`}>
+                                            {formatCurrency(Math.abs(balance))}
+                                        </p>
+                                    </div>
+                                    <BiWallet className="text-3xl text-blue-600 dark:text-blue-400 transition-transform duration-300 group-hover:scale-110" />
+                                </div>
+                            </div>
+
+                            <div className={`card border-l-4 border-l-emerald-500 p-6 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-0.5 ${mounted ? 'animate-slide-up stagger-2' : 'opacity-0'}`}>
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                                            Total Income
+                                        </p>
+                                        <p className="mt-2 text-2xl font-black text-emerald-600 dark:text-emerald-300">
+                                            {formatCurrency(totalIncome)}
+                                        </p>
+                                    </div>
+                                    <MdTrendingUp className="text-3xl text-emerald-600 dark:text-emerald-300" />
+                                </div>
+                            </div>
+
+                            <div className={`card border-l-4 border-l-rose-500 p-6 transition-all duration-300 hover:shadow-lg hover:shadow-rose-500/10 hover:-translate-y-0.5 ${mounted ? 'animate-slide-up stagger-3' : 'opacity-0'}`}>
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                                            Total Expenses
+                                        </p>
+                                        <p className="mt-2 text-2xl font-black text-rose-600 dark:text-rose-300">
+                                            {formatCurrency(totalExpenses)}
+                                        </p>
+                                    </div>
+                                    <MdTrendingDown className="text-3xl text-rose-600 dark:text-rose-300" />
+                                </div>
+                            </div>
+                        </section>
+
+                        <section className="card border-l-4 border-l-cyan-500 p-6">
+                            <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+                                <div className="max-w-4xl">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-100 text-cyan-700 dark:bg-cyan-500/10 dark:text-cyan-300">
+                                            <LuBrainCircuit className="text-xl" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-700 dark:text-cyan-300">
+                                                Offline smart coach
+                                            </p>
+                                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                                                Ask Spark without using internet
+                                            </h3>
+                                        </div>
+                                    </div>
+
+                                    <form onSubmit={handleCoachSubmit} className="mt-5 flex flex-col gap-3 sm:flex-row">
+                                        <input
+                                            value={coachQuestion}
+                                            onChange={(event) => setCoachQuestion(event.target.value)}
+                                            className="input-field min-h-12 transition-all duration-200 focus:scale-[1.01]"
+                                            placeholder="Ask: forecast this month, what can I cut, any duplicates..."
+                                        />
+                                        <button className="btn-primary w-full px-5 py-3 text-sm sm:w-auto transition-all duration-200 active:scale-95">
+                                            <LuSend />
+                                            Ask
+                                        </button>
+                                    </form>
+
+                                    <div className="mt-4 rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm leading-6 text-cyan-950 transition-all duration-300 hover:shadow-sm dark:border-cyan-500/20 dark:bg-cyan-500/10 dark:text-cyan-100">
+                                        {coachAnswer}
+                                    </div>
+                                </div>
+
+                                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-100 transition-all duration-300 hover:shadow-md hover:scale-[1.01]">
+                                    <div className="flex items-center gap-2">
+                                        <LuWifiOff className="animate-bounce-soft" />
+                                        Data saver on
+                                    </div>
+                                    <p className="mt-2 text-xs font-normal leading-5">
+                                        Local answers use data already loaded in Spark.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+                                {smartInsights.map((insight, index) => (
+                                    <div key={insight.title} className={`rounded-2xl border p-4 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 ${toneClasses[insight.tone]} animate-slide-up stagger-${Math.min(index + 1, 6)}`}>
+                                        <p className="text-xs font-semibold uppercase tracking-[0.18em] opacity-70">
+                                            {insight.title}
+                                        </p>
+                                        <p className="mt-2 text-xl font-black">
+                                            {insight.value}
+                                        </p>
+                                        <p className="mt-2 text-sm leading-5 opacity-80">
+                                            {insight.detail}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="mt-6 grid gap-4 lg:grid-cols-2">
+                                <div className="rounded-2xl border border-slate-200 bg-white/70 p-4 transition-all duration-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/40">
+                                    <div className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
+                                        <LuTriangleAlert className="text-amber-500" />
+                                        Smart alerts
+                                    </div>
+                                    <div className="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                                        {duplicateCharges.length > 0 ? (
+                                            duplicateCharges.map((group) => (
+                                                <p key={`${group[0].title}-${group[0].date}`}>
+                                                    Possible duplicate: {group[0].title} for {formatCurrency(group[0].amount)} on {group[0].date}.
+                                                </p>
+                                            ))
+                                        ) : (
+                                            <p>No duplicate same-day charges found.</p>
+                                        )}
+                                        {subscriptionHints.length > 0 ? (
+                                            <p>
+                                                Recurring watch: {subscriptionHints.map((group) => group[0].title).join(", ")}.
+                                            </p>
+                                        ) : (
+                                            <p>No obvious subscriptions found yet.</p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="rounded-2xl border border-slate-200 bg-white/70 p-4 transition-all duration-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/40">
+                                    <div className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
+                                        <LuBadgeCheck className="text-emerald-500" />
+                                        Offline recommendations
+                                    </div>
+                                    <div className="mt-3 grid gap-2 text-sm text-slate-600 dark:text-slate-300 sm:grid-cols-2">
+                                        <div>
+                                            <p className="font-semibold text-slate-900 dark:text-white">Budget ideas</p>
+                                            {budgetSuggestions.length > 0 ? (
+                                                budgetSuggestions.map((item) => (
+                                                    <p key={item.category}>{item.category}: {formatCurrency(item.amount)}</p>
+                                                ))
+                                            ) : (
+                                                <p>Add categorized expenses for suggestions.</p>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <p className="font-semibold text-slate-900 dark:text-white">Category ideas</p>
+                                            {categorySuggestions.length > 0 ? (
+                                                categorySuggestions.map(({ transaction, suggestion }) => (
+                                                    <p key={transaction.id}>{transaction.title}: {suggestion}</p>
+                                                ))
+                                            ) : (
+                                                <p>No uncategorized matches right now.</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mt-6 rounded-2xl border border-violet-200 bg-violet-50 p-4 transition-all duration-300 hover:shadow-lg dark:border-violet-500/20 dark:bg-violet-500/10">
+                                <div className="flex flex-col gap-4">
+                                    <div className="text-sm leading-6 text-violet-950 dark:text-violet-100">
+                                        <div className="flex items-center gap-2 font-bold">
+                                            <LuSparkles />
+                                            Optional online coach
+                                        </div>
+                                        {aiLoading ? (
+                                            <p className="mt-2 flex items-center gap-2">
+                                                <LuLoader className="animate-spin" />
+                                                Reviewing your latest finance data online...
+                                            </p>
+                                        ) : aiInsight ? (
+                                            <div className="mt-2 space-y-3">
+                                                <p>{aiInsight.summary}</p>
+                                                {aiInsight.actions.length > 0 && (
+                                                    <div className="grid gap-2 sm:grid-cols-3">
+                                                        {aiInsight.actions.map((action, index) => (
+                                                            <div
+                                                                key={action}
+                                                                className="rounded-2xl border border-violet-200 bg-white/70 px-4 py-3 text-sm font-medium transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 dark:border-violet-500/20 dark:bg-slate-950/30"
+                                                                style={{ animationDelay: `${index * 0.05}s` }}
+                                                            >
+                                                                {action}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ) : aiError ? (
+                                            <p className="mt-2 text-rose-600 dark:text-rose-300">{aiError}</p>
+                                        ) : (
+                                            <p className="mt-2">Use this only when you want a richer cloud AI explanation.</p>
+                                        )}
+                                    </div>
+
+                                    <form onSubmit={handleOnlineQuestionSubmit} className="grid gap-3 lg:grid-cols-[1fr_auto_auto]">
+                                        <input
+                                            value={onlineQuestion}
+                                            onChange={(event) => setOnlineQuestion(event.target.value)}
+                                            className="input-field min-h-12"
+                                            placeholder="Ask online AI: why did I overspend, what should I budget..."
+                                        />
+                                        <button
+                                            disabled={onlineQuestionLoading}
+                                            className="btn-primary w-full px-5 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-60 lg:w-auto"
+                                        >
+                                            <LuSend />
+                                            {onlineQuestionLoading ? "Asking..." : "Ask online"}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={generateAiInsight}
+                                            disabled={aiLoading}
+                                            className="btn-secondary w-full px-5 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-60 lg:w-auto"
+                                        >
+                                            <LuSparkles />
+                                            {aiLoading ? "Thinking..." : "Full insight"}
+                                        </button>
+                                    </form>
+
+                                    {onlineAnswer && (
+                                        <div className="rounded-2xl border border-violet-200 bg-white/70 px-4 py-3 text-sm leading-6 text-violet-950 dark:border-violet-500/20 dark:bg-slate-950/30 dark:text-violet-100">
+                                            {onlineAnswer}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </section>
+
+                        <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+                            <div className={`card p-6 transition-all duration-300 hover:shadow-lg ${mounted ? 'animate-slide-up stagger-4' : 'opacity-0'}`}>
+                                <div className="mb-4 flex items-center justify-between gap-4">
+                                    <div>
+                                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                                            Income vs Expenses
+                                        </h3>
+                                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                                            The last seven entries at a glance.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {lineData.length > 0 ? (
+                                    <ResponsiveContainer width="100%" height={320}>
+                                        <LineChart data={lineData}>
+                                            <XAxis dataKey="day" stroke="currentColor" />
+                                            <YAxis stroke="currentColor" tickFormatter={(value) => value.toLocaleString()} />
+                                            <Tooltip formatter={(value) => [formatCurrency(Number(value)), ""]} />
+                                            <Line
+                                                type="monotone"
+                                                dataKey="income"
+                                                stroke="#10b981"
+                                                strokeWidth={3}
+                                                dot={false}
+                                                name="Income"
+                                            />
+                                            <Line
+                                                type="monotone"
+                                                dataKey="spending"
+                                                stroke="#ef4444"
+                                                strokeWidth={3}
+                                                dot={false}
+                                                name="Expenses"
+                                            />
+                                        </LineChart>
+                                    </ResponsiveContainer>
+                                ) : (
+                                    <div className="flex h-80 items-center justify-center">
+                                        <div className="w-full space-y-4 px-8">
+                                            <div className="skeleton h-4 w-3/4" />
+                                            <div className="skeleton h-4 w-1/2" />
+                                            <div className="skeleton h-4 w-5/6" />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className={`card p-6 transition-all duration-300 hover:shadow-lg ${mounted ? 'animate-slide-up stagger-5' : 'opacity-0'}`}>
+                                <div className="mb-4 flex items-center justify-between gap-4">
+                                    <div>
+                                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                                            Spending by category
+                                        </h3>
+                                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                                            Where your money goes each month.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {pieData.length > 0 ? (
+                                    <ResponsiveContainer width="100%" height={320}>
+                                        <PieChart>
+                                            <Pie
+                                                data={pieData}
+                                                cx="50%"
+                                                cy="50%"
+                                                innerRadius={60}
+                                                outerRadius={100}
+                                                paddingAngle={4}
+                                                dataKey="value"
+                                            >
+                                                {pieData.map((entry, index) => (
+                                                    <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />
+                                                ))}
+                                            </Pie>
+                                            <Tooltip formatter={(value) => [formatCurrency(Number(value)), ""]} />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                ) : (
+                                    <div className="flex h-80 items-center justify-center">
+                                        <p className="text-sm text-slate-500 dark:text-slate-400">Add categorized expenses to see your spending breakdown.</p>
+                                    </div>
+                                )}
+                            </div>
+                        </section>
+
+                        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                            {budgetSuggestions.length > 0 && (
+                                <div className="card p-5 transition-all duration-300 hover:shadow-md">
+                                    <p className="text-sm font-bold text-slate-900 dark:text-white">Budget ideas</p>
+                                    <div className="mt-2 space-y-1 text-sm text-slate-600 dark:text-slate-300">
+                                        {budgetSuggestions.map((item) => (
+                                            <p key={item.category}>{item.category}: {formatCurrency(item.amount)}</p>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {categorySuggestions.length > 0 && (
+                                <div className="card p-5 transition-all duration-300 hover:shadow-md">
+                                    <p className="text-sm font-bold text-slate-900 dark:text-white">Category ideas</p>
+                                    <div className="mt-2 space-y-1 text-sm text-slate-600 dark:text-slate-300">
+                                        {categorySuggestions.map(({ transaction, suggestion }) => (
+                                            <p key={transaction.id}>{transaction.title}: {suggestion}</p>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {duplicateCharges.length > 0 && (
+                                <div className="card p-5 transition-all duration-300 hover:shadow-md">
+                                    <p className="text-sm font-bold text-slate-900 dark:text-white">Possible duplicates</p>
+                                    <div className="mt-2 space-y-1 text-sm text-slate-600 dark:text-slate-300">
+                                        {duplicateCharges.map((group) => (
+                                            <p key={`${group[0].title}-${group[0].date}`}>
+                                                {group[0].title} on {group[0].date}
+                                            </p>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {subscriptionHints.length > 0 && (
+                                <div className="card p-5 transition-all duration-300 hover:shadow-md">
+                                    <p className="text-sm font-bold text-slate-900 dark:text-white">Recurring watch</p>
+                                    <div className="mt-2 space-y-1 text-sm text-slate-600 dark:text-slate-300">
+                                        {subscriptionHints.map((group) => (
+                                            <p key={group[0].title}>{group[0].title}</p>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </section>
+
+                    </div>
                     <Outlet />
                 </main>
             </div>
