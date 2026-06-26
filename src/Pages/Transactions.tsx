@@ -5,7 +5,6 @@ import axios from "axios";
 
 import { api, setApiAuthToken } from "../lib/api";
 import { useAppData } from "../contexts/AppDataContext";
-import type { Transaction } from "../types";
 
 type ShareState = {
     transactionId: number;

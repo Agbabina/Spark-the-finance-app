@@ -5,7 +5,7 @@ import axios from "axios";
 import Input from "../Components/Input";
 import { api, setApiAuthToken } from "../lib/api";
 import { expenseCategories } from "../lib/categories";
-import type { Budget, Transaction } from "../types";
+import type { Budget } from "../types";
 import { useAppData } from "../contexts/AppDataContext";
 
 const monthOptions = [

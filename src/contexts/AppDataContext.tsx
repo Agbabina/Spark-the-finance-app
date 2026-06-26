@@ -75,9 +75,6 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    const fetchAppData = async () => {
-        await Promise.all([fetchTransactions(), fetchBudgets(), fetchGoals()]);
-    };
 
     useEffect(() => {
         const token = localStorage.getItem("token");

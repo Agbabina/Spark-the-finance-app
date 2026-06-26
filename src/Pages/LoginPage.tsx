@@ -4,7 +4,6 @@ import { LuLoader } from "react-icons/lu";
 
 import Input from "../Components/Input";
 import { api, setApiAuthToken } from "../lib/api";
-import { useAppData } from "../contexts/AppDataContext";
 
 function LoginPage({ setIsLoggedIn, setUsername }: { setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>; setUsername: React.Dispatch<React.SetStateAction<string>>; }) {
     const navigate = useNavigate();

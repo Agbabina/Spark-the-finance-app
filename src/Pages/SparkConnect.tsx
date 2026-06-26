@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import { api, setApiAuthToken } from "../lib/api";
-import { useAppData } from "../contexts/AppDataContext";
 import type { BankAccount } from "../types";
 
 function formatCurrency(value: number) {
