@@ -10,8 +10,8 @@ primary_region = "lhr"
   ASPNETCORE_ENVIRONMENT = "Production"
   ConnectionStrings__DefaultConnection = "Data Source=/app/data/app.db"
   Jwt__Key = "YourSuperSecretKeyHere12345678901234567890"
-  Jwt__Issuer = "spark-finance"
-  Jwt__Audience = "https://sparkfinance.onrender.com"
+  Jwt__Issuer = "https://sparkbackend-h2g7.onrender.com"
+  Jwt__Audience = "https://sparkbackend-h2g7.onrender.com"
   Frontend__Url = "https://sparkfinance.onrender.com"
 
 [http_service]

@@ -67,7 +67,7 @@ describe("API Module", () => {
     });
 
     it("should have default baseURL as fallback", () => {
-      expect(api.defaults.baseURL).toBe("https://spark-the-finance-app.fly.dev");
+      expect(api.defaults.baseURL).toBe("https://sparkbackend-h2g7.onrender.com");
     });
   });
 
