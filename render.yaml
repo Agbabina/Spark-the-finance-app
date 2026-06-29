@@ -33,5 +33,5 @@ services:
         value: https://sparkbackend-h2g7.onrender.com
     routes:
       - type: rewrite
-        source: /*
+        path: /*
         destination: /index.html
