@@ -120,63 +120,6 @@ public class AuthController : ControllerBase
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
-
-    [HttpGet("google")]
-    public IActionResult GoogleLogin([FromQuery] string? returnUrl = null)
-    {
-        var redirectUrl = Url.Action(nameof(GoogleCallback), "Auth", new { returnUrl });
-        var properties = new Microsoft.AspNetCore.Authentication.AuthenticationProperties { RedirectUri = redirectUrl };
-        return Challenge(properties, "Google");
-    }
-
-    [HttpGet("google-callback")]
-    public async Task<IActionResult> GoogleCallback([FromQuery] string? returnUrl = null)
-    {
-        var result = await HttpContext.AuthenticateAsync("External");
-        if (!result.Succeeded)
-        {
-            return BadRequest(new { message = "External authentication failed" });
-        }
-
-        var email = result.Principal.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
-        var name = result.Principal.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
-
-        if (string.IsNullOrEmpty(email))
-        {
-            return BadRequest(new { message = "Email not provided by Google" });
-        }
-
-        var user = await _userManager.FindByEmailAsync(email);
-        if (user == null)
-        {
-            user = new User { UserName = name ?? email, Email = email };
-            var createResult = await _userManager.CreateAsync(user);
-            if (!createResult.Succeeded)
-            {
-                return BadRequest(new { message = "Failed to create user account" });
-            }
-        }
-
-        var token = GenerateJwtToken(user);
-        var frontendUrl = _configuration["Frontend:Url"];
-        if (string.IsNullOrEmpty(frontendUrl))
-        {
-            var requestOrigin = $"{Request.Scheme}://{Request.Host}";
-            frontendUrl = Request.Headers["Origin"].ToString();
-            if (string.IsNullOrEmpty(frontendUrl))
-            {
-                frontendUrl = requestOrigin;
-            }
-        }
-        var targetUrl = !string.IsNullOrEmpty(returnUrl) ? returnUrl : frontendUrl;
-
-        if (!targetUrl.EndsWith("/login") && !targetUrl.EndsWith("/"))
-        {
-            targetUrl = targetUrl.TrimEnd('/') + "/login";
-        }
-
-        return Redirect($"{targetUrl}?token={token}");
-    }
 }
 
 public class RegisterModel

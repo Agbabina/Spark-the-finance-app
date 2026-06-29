@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim() || "https://sparkbackend-h2g7.onrender.com";
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim() || "http://localhost:5173";
 
 export const api = axios.create({
     baseURL: apiBaseUrl,
