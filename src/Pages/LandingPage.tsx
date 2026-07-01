@@ -56,9 +56,7 @@ function LandingPage() {
                         <h1 style={{ margin: 0, fontSize: "clamp(36px, 5vw, 48px)", fontWeight: 900, lineHeight: 1.1, color: isDark ? "#ffffff" : "#0f172a" }}>
                             Track money with a <span style={{ background: "linear-gradient(135deg, #2563eb, #7c3aed)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>calmer, sharper</span> dashboard.
                         </h1>
-                        <div style={{ minWidth: "92px" }}>
-                            <SparkLightning />
-                        </div>
+                    
                     </div>
                     <p style={{ margin: "24px auto 0", maxWidth: "672px", fontSize: "18px", lineHeight: 1.7, color: isDark ? "#cbd5e1" : "#475569" }}>
                         Capture income, watch spending, and read your finances at a glance — no noise, no clutter, just clarity.

@@ -152,10 +152,10 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapFallbackToFile("index.html");
-//I added this robusity so i would not crash out
+app.MapGet("/", () => Results.Ok("Spark Finance Backend is running"));
+app.MapGet("/test", () => Results.Ok("Spark Finance Backend is running"));
 
-app.MapGet("/test", ()=>{Results.Ok("Spark Finance Backend is running");});
+app.MapFallbackToFile("index.html");
 
 app.Run();
 
