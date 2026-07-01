@@ -1,4 +1,4 @@
-service:
+services:
   - type: web
     name: spark-frontend
     runtime: static
@@ -12,3 +12,13 @@ service:
       - type: rewrite
         source: /*
         destination: /index.html
+
+  - type: web
+    name: spark-backend
+    env: docker
+    plan: free
+    buildCommand: cd Backend && dotnet publish -c Release -o ./publish
+    startCommand: cd Backend && dotnet ./publish/Backend.dll
+    envVars:
+      - key: ASPNETCORE_URLS
+        value: http://0.0.0.0:10000
