@@ -5,7 +5,8 @@ import { LuLoader } from "react-icons/lu";
 import Input from "../Components/Input";
 import { api, setApiAuthToken } from "../lib/api";
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim() || "";
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim() ||
+    (import.meta.env.DEV ? "http://localhost:5219" : "https://sparkbackend-h2g7.onrender.com");
 
 function LoginPage({ setIsLoggedIn, setUsername }: { setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>; setUsername: React.Dispatch<React.SetStateAction<string>>; }) {
     const navigate = useNavigate();

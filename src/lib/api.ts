@@ -1,9 +1,10 @@
 import axios from "axios";
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim() || "";
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim() ||
+    (import.meta.env.DEV ? "http://localhost:5219" : "https://sparkbackend-h2g7.onrender.com");
 
 export const api = axios.create({
-    baseURL: apiBaseUrl || undefined,
+    baseURL: apiBaseUrl,
 });
 
 // Request interceptor: ensure Authorization header is attached from localStorage when available
