@@ -96,9 +96,9 @@ public class AuthController : ControllerBase
 
     private string GenerateJwtToken(User user)
     {
-        var jwtKey = _configuration["Jwt:Key"] ?? "YourSuperSecretKeyHere12345678901234567890";
-        var issuer = _configuration["Jwt:Issuer"] ?? "YourIssuer";
-        var audience = _configuration["Jwt:Audience"] ?? "YourAudience";
+        var jwtKey = _configuration["Jwt:Key"] ?? _configuration["JWT_KEY"] ?? "YourSuperSecretKeyHere12345678901234567890";
+        var issuer = _configuration["Jwt:Issuer"] ?? _configuration["JWT_ISSUER"] ?? "https://sparkbackend-h2g7.onrender.com";
+        var audience = _configuration["Jwt:Audience"] ?? _configuration["JWT_AUDIENCE"] ?? issuer;
 
         var claims = new[]
         {

@@ -36,13 +36,13 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    var jwtKey = builder.Configuration["Jwt:Key"];
+    var jwtKey = builder.Configuration["Jwt:Key"] ?? builder.Configuration["JWT_KEY"];
     if (string.IsNullOrEmpty(jwtKey))
     {
         jwtKey = "YourSuperSecretKeyHere12345678901234567890";
     }
-    var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "https://sparkbackend-h2g7.onrender.com";
-    var jwtAudience = builder.Configuration["Jwt:Audience"] ?? jwtIssuer;
+    var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? builder.Configuration["JWT_ISSUER"] ?? "https://sparkbackend-h2g7.onrender.com";
+    var jwtAudience = builder.Configuration["Jwt:Audience"] ?? builder.Configuration["JWT_AUDIENCE"] ?? jwtIssuer;
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
