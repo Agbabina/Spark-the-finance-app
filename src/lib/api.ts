@@ -17,11 +17,12 @@ api.interceptors.request.use(
             }
 
             const token = localStorage.getItem("token");
-            if (token) {
-                config.headers = config.headers || {};
-                if (!(config.headers as Record<string, any>).Authorization) {
-                    (config.headers as Record<string, any>).Authorization = `Bearer ${token}`;
-                }
+            if (token && token !== "undefined" && token !== "null") {
+                const headers = config.headers || {};
+                config.headers = {
+                    ...headers,
+                    Authorization: `Bearer ${token}`,
+                } as typeof config.headers;
             }
         } catch {
             // localStorage may be unavailable in some environments

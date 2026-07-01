@@ -37,6 +37,7 @@ function decodeTokenUsername(token: string) {
 function AppInner() {
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const navigate = useNavigate();
     const { fetchTransactions, fetchBudgets, fetchGoals, onLogout, setUsername, setGlobalError } = useAppData();
 
     useEffect(() => {
@@ -63,11 +64,12 @@ function AppInner() {
             onLogout();
             setGlobalError(detail?.message || "Session expired. Please login.");
             setIsLoggedIn(false);
+            navigate("/login", { replace: true });
         };
         window.addEventListener("auth:unauthorized", handleUnauthorized as EventListener);
         return () =>
             window.removeEventListener("auth:unauthorized", handleUnauthorized as EventListener);
-    }, [onLogout, setGlobalError]);
+    }, [navigate, onLogout, setGlobalError]);
 
     if (isLoading) {
         return (

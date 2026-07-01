@@ -70,6 +70,11 @@ function LoginPage({ setIsLoggedIn, setUsername }: { setIsLoggedIn: React.Dispat
                 const response = await api.post("/api/auth/login", loginData);
                 const token = response.data.token;
                 const username = response.data.username || form.username;
+
+                if (!token || token === "undefined" || token === "null") {
+                    throw new Error("Authentication failed. Please try again.");
+                }
+
                 localStorage.setItem("token", token);
                 localStorage.setItem("username", username);
                 setApiAuthToken(token);
