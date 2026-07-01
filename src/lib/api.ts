@@ -1,9 +1,9 @@
 import axios from "axios";
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim() || "http://localhost:5173";
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim() || "";
 
 export const api = axios.create({
-    baseURL: apiBaseUrl,
+    baseURL: apiBaseUrl || undefined,
 });
 
 // Request interceptor: ensure Authorization header is attached from localStorage when available

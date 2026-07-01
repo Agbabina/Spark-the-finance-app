@@ -6,8 +6,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Linq;
 using System.Text;
-//POle
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
@@ -39,8 +40,8 @@ builder.Services.AddAuthentication(options =>
     {
         jwtKey = "YourSuperSecretKeyHere12345678901234567890";
     }
-    var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "YourIssuer";
-    var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "YourAudience";
+    var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "https://sparkbackend-h2g7.onrender.com";
+    var jwtAudience = builder.Configuration["Jwt:Audience"] ?? jwtIssuer;
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -76,7 +77,24 @@ builder.Services.AddHttpClient<AiInsightService>();
 
 var allowedOrigins = builder.Configuration
     .GetSection("Cors:AllowedOrigins")
-    .Get<string[]>() ?? [];
+    .Get<string[]>() ?? Array.Empty<string>();
+
+var corsOriginsEnv = builder.Configuration["CORS_ALLOWED_ORIGINS"];
+if (!string.IsNullOrWhiteSpace(corsOriginsEnv))
+{
+    allowedOrigins = corsOriginsEnv
+        .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+        .ToArray();
+}
+
+if (allowedOrigins.Length == 0)
+{
+    allowedOrigins = new[]
+    {
+        "http://localhost:5173",
+        "https://sparkfinance.onrender.com"
+    };
+}
 
 builder.Services.AddCors(options =>
 {

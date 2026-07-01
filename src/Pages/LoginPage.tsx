@@ -5,6 +5,8 @@ import { LuLoader } from "react-icons/lu";
 import Input from "../Components/Input";
 import { api, setApiAuthToken } from "../lib/api";
 
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim() || "";
+
 function LoginPage({ setIsLoggedIn, setUsername }: { setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>; setUsername: React.Dispatch<React.SetStateAction<string>>; }) {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -51,16 +53,29 @@ function LoginPage({ setIsLoggedIn, setUsername }: { setIsLoggedIn: React.Dispat
 
         try {
             if (isRegister) {
-                await api.post("/api/auth/register", form);
+                const response = await api.post("/api/auth/register", form);
+                const token = response.data.token;
+                const username = response.data.username || form.username;
+                if (token) {
+                    localStorage.setItem("token", token);
+                    localStorage.setItem("username", username);
+                    setApiAuthToken(token);
+                    setUsername(username);
+                    setIsLoggedIn(true);
+                    navigate("/", { replace: true });
+                    return;
+                }
                 setIsRegister(false);
                 setForm({ username: "", email: "", password: "" });
             } else {
                 const loginData = { username: form.username, password: form.password };
                 const response = await api.post("/api/auth/login", loginData);
-                localStorage.setItem("token", response.data.token);
-                localStorage.setItem("username", form.username);
-                setApiAuthToken(response.data.token);
-                setUsername(form.username);
+                const token = response.data.token;
+                const username = response.data.username || form.username;
+                localStorage.setItem("token", token);
+                localStorage.setItem("username", username);
+                setApiAuthToken(token);
+                setUsername(username);
                 setIsLoggedIn(true);
                 navigate("/", { replace: true });
             }
@@ -77,7 +92,9 @@ function LoginPage({ setIsLoggedIn, setUsername }: { setIsLoggedIn: React.Dispat
     };
 
     const handleGoogleLogin = () => {
-        window.location.href = `/api/auth/google?returnUrl=${encodeURIComponent(window.location.origin)}`;
+        const baseUrl = apiBaseUrl.replace(/\/$/, "");
+        const authUrl = `${baseUrl}/api/auth/google?returnUrl=${encodeURIComponent(window.location.origin)}`;
+        window.location.href = authUrl;
     };
 
     const title = isRegister ? "Create your account" : "Welcome back";

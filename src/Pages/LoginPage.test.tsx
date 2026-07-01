@@ -39,8 +39,7 @@ describe("LoginPage", () => {
   it("toggles between login and register modes", async () => {
     renderLoginPage();
 
-    // Initially should be in login mode (password placeholder is dots)
-    expect(screen.getByPlaceholderText("â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢")).toBeDefined();
+    expect(screen.getByLabelText(/password/i)).toBeDefined();
   });
 
   it("calls setApiAuthToken and setIsLoggedIn on successful login", async () => {
@@ -54,7 +53,7 @@ describe("LoginPage", () => {
     renderLoginPage();
 
     const usernameInput = screen.getByPlaceholderText("Enter your username");
-    const passwordInput = screen.getByPlaceholderText("â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢");
+    const passwordInput = screen.getByLabelText(/password/i);
 
     await user.type(usernameInput, "testuser");
     await user.type(passwordInput, "password123");
@@ -74,9 +73,10 @@ describe("LoginPage", () => {
 
     renderLoginPage();
 
-    // Form should be empty initially
     const usernameInput = screen.getByPlaceholderText("Enter your username");
+    const passwordInput = screen.getByLabelText(/password/i);
     expect((usernameInput as HTMLInputElement).value).toBe("");
+    expect((passwordInput as HTMLInputElement).value).toBe("");
   });
 
   it("displays loading state during submission", async () => {
@@ -96,9 +96,8 @@ describe("LoginPage", () => {
 
     renderLoginPage();
 
-    // Get the form inputs
     const usernameInput = screen.getByPlaceholderText("Enter your username") as HTMLInputElement;
-    const passwordInput = screen.getByPlaceholderText("â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢") as HTMLInputElement;
+    const passwordInput = screen.getByLabelText(/password/i) as HTMLInputElement;
 
     expect(usernameInput.value).toBe("");
     expect(passwordInput.value).toBe("");
