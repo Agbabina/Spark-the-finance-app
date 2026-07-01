@@ -16,6 +16,44 @@
 
 :root {
   font-family: "SpaceGrotesk";
+  color-scheme: light;
+  --bg: #f8fbff;
+  --surface: rgba(255, 255, 255, 0.92);
+  --surface-strong: rgba(255, 255, 255, 1);
+  --text: #0f172a;
+  --muted: #475569;
+  --border: rgba(148, 163, 184, 0.24);
+  --shadow: 0 24px 80px rgba(15, 23, 42, 0.08);
+  --primary: #2563eb;
+  --primary-soft: rgba(37, 99, 235, 0.14);
+}
+
+.light {
+  color-scheme: light;
+  --bg: #f8fbff;
+  --surface: rgba(255, 255, 255, 0.92);
+  --surface-strong: rgba(255, 255, 255, 1);
+  --text: #0f172a;
+  --muted: #475569;
+  --border: rgba(148, 163, 184, 0.24);
+  --shadow: 0 24px 80px rgba(15, 23, 42, 0.08);
+  --primary: #2563eb;
+  --primary-soft: rgba(37, 99, 235, 0.14);
+  background: radial-gradient(circle at top left, rgba(37, 99, 235, 0.16), transparent 28%), radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.08), transparent 36%);
+}
+
+.dark {
+  color-scheme: dark;
+  --bg: #020617;
+  --surface: rgba(15, 23, 42, 0.94);
+  --surface-strong: rgba(15, 23, 42, 1);
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --border: rgba(148, 163, 184, 0.12);
+  --shadow: 0 24px 120px rgba(0, 0, 0, 0.45);
+  --primary: #22d3ee;
+  --primary-soft: rgba(14, 165, 233, 0.16);
+  background: radial-gradient(circle at top right, rgba(34, 211, 238, 0.14), transparent 24%), radial-gradient(circle at bottom left, rgba(124, 58, 237, 0.12), transparent 30%);
 }
 
 html,
@@ -28,8 +66,18 @@ body,
 body {
   margin: 0;
   min-width: 320px;
-  background: #f8fbff;
-  color: #0f172a;
+  background: var(--bg);
+  color: var(--text);
+  transition: background 300ms ease, color 300ms ease;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at top right, rgba(255,255,255,0.06), transparent 26%), radial-gradient(circle at bottom left, rgba(255,255,255,0.04), transparent 20%);
+  opacity: 0.35;
 }
 
 * {

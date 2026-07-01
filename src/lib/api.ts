@@ -11,6 +11,11 @@ export const api = axios.create({
 api.interceptors.request.use(
     (config) => {
         try {
+            const requestUrl = config.url ?? "";
+            if (requestUrl.includes("/api/auth/login") || requestUrl.includes("/api/auth/register")) {
+                return config;
+            }
+
             const token = localStorage.getItem("token");
             if (token) {
                 config.headers = config.headers || {};

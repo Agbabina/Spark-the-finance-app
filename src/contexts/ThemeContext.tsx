@@ -11,12 +11,16 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
     const [theme, setTheme] = useState<Theme>(() => {
+        if (typeof window === "undefined") return "dark";
         const saved = localStorage.getItem("theme");
         return saved === "light" ? "light" : "dark";
     });
 
     useEffect(() => {
+        if (typeof window === "undefined") return;
         localStorage.setItem("theme", theme);
+        document.documentElement.classList.toggle("dark", theme === "dark");
+        document.documentElement.classList.toggle("light", theme === "light");
     }, [theme]);
 
     const toggleTheme = () => {
@@ -25,7 +29,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
     return (
         <ThemeContext.Provider value={{ theme, toggleTheme }}>
-            <div className={theme === "dark" ? "dark" : ""} style={{ minHeight: "100vh" }}>
+            <div className={theme} style={{ minHeight: "100vh" }}>
                 {children}
             </div>
         </ThemeContext.Provider>

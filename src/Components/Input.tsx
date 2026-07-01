@@ -23,6 +23,7 @@ function Input({ label, hint, error, className = "", wrapperClassName = "", id, 
                 {...props}
                 id={inputId}
                 aria-invalid={Boolean(error)}
+                autoComplete={props.autoComplete || (props.type === "password" ? "current-password" : props.type === "email" ? "email" : "username")}
                 className={`input-field ${error ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500" : ""} ${className}`}
             />
             {(hint || error) && (

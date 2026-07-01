@@ -193,6 +193,7 @@ function LoginPage({ setIsLoggedIn, setUsername }: { setIsLoggedIn: React.Dispat
                             onChange={handleChange}
                             value={form.username}
                             label="Username"
+                            autoComplete="username"
                             required
                         />
 
@@ -204,6 +205,7 @@ function LoginPage({ setIsLoggedIn, setUsername }: { setIsLoggedIn: React.Dispat
                                 onChange={handleChange}
                                 value={form.email}
                                 label="Email"
+                                autoComplete="email"
                                 required
                             />
                         )}
@@ -215,6 +217,7 @@ function LoginPage({ setIsLoggedIn, setUsername }: { setIsLoggedIn: React.Dispat
                             onChange={handleChange}
                             value={form.password}
                             label="Password"
+                            autoComplete="current-password"
                             required
                         />
 

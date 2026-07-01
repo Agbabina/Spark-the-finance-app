@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 import "./index.css";
@@ -41,10 +41,14 @@ function AppInner() {
 
     useEffect(() => {
         const token = localStorage.getItem("token");
-        const savedUsername = localStorage.getItem("username") || (token ? decodeTokenUsername(token) : "");
-        setApiAuthToken(token);
-        setIsLoggedIn(Boolean(token));
+        const validToken = token && token !== "undefined" && token !== "null" ? token : null;
+        const savedUsername = localStorage.getItem("username") || (validToken ? decodeTokenUsername(validToken) : "");
+        setApiAuthToken(validToken);
+        setIsLoggedIn(Boolean(validToken));
         if (savedUsername) setUsername(savedUsername);
+        if (!validToken) {
+            localStorage.removeItem("token");
+        }
         setIsLoading(false);
     }, [setUsername]);
 
@@ -116,6 +120,11 @@ function AppLayout() {
     return (
         <div className="app-shell">
             <Sidebar />
+            <main className="flex-1 bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
+                <div className="mx-auto min-h-[calc(100vh-0px)] max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+                    <Outlet />
+                </div>
+            </main>
         </div>
     );
 }
