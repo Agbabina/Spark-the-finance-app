@@ -2,6 +2,7 @@ import { useTheme } from "../contexts/ThemeContext";
 import { useNavigate } from "react-router-dom";
 import { LuWallet, LuSparkles, LuLock, LuCreditCard, LuTrendingUp, LuActivity, LuSun, LuMoon } from "react-icons/lu";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import SparkLightning from "../Components/SparkLightning";
 
 function LandingPage() {
     const navigate = useNavigate();
@@ -32,7 +33,7 @@ function LandingPage() {
             <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, borderBottom: isDark ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(0,0,0,0.08)", background: isDark ? "rgba(2,6,23,0.8)" : "rgba(255,255,255,0.8)", backdropFilter: "blur(12px)" }}>
                 <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <span style={{ fontSize: "20px", fontWeight: 900, color: isDark ? "#ffffff" : "#0f172a" }}>Spark</span>
+                        <SparkLightning compact className="landing-logo" />
                         <span style={{ borderRadius: "9999px", background: "#2563eb", padding: "2px 8px", fontSize: "12px", fontWeight: 700, color: "#ffffff" }}>Finance</span>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -51,9 +52,14 @@ function LandingPage() {
 
                 <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 16px", textAlign: "center" }}>
                     <p style={{ fontSize: "14px", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "#2563eb" }}>Personal finance, reimagined</p>
-                    <h1 style={{ marginTop: "24px", fontSize: "clamp(36px, 5vw, 48px)", fontWeight: 900, lineHeight: 1.1, color: isDark ? "#ffffff" : "#0f172a" }}>
-                        Track money with a <span style={{ background: "linear-gradient(135deg, #2563eb, #7c3aed)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>calmer, sharper</span> dashboard.
-                    </h1>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", flexWrap: "wrap", marginTop: "24px" }}>
+                        <h1 style={{ margin: 0, fontSize: "clamp(36px, 5vw, 48px)", fontWeight: 900, lineHeight: 1.1, color: isDark ? "#ffffff" : "#0f172a" }}>
+                            Track money with a <span style={{ background: "linear-gradient(135deg, #2563eb, #7c3aed)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>calmer, sharper</span> dashboard.
+                        </h1>
+                        <div style={{ minWidth: "92px" }}>
+                            <SparkLightning />
+                        </div>
+                    </div>
                     <p style={{ margin: "24px auto 0", maxWidth: "672px", fontSize: "18px", lineHeight: 1.7, color: isDark ? "#cbd5e1" : "#475569" }}>
                         Capture income, watch spending, and read your finances at a glance — no noise, no clutter, just clarity.
                     </p>

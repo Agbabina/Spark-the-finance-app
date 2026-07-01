@@ -46,18 +46,19 @@ function Sidebar() {
                                 <p className="text-xs font-semibold uppercase tracking-[0.35em] text-blue-600 dark:text-blue-400">
                                     Finance hub
                                 </p>
-                                    <div className="mt-2 flex items-center gap-2">
-                                        <div className="relative inline-flex h-12 items-center justify-center rounded-3xl bg-slate-950 px-4 text-center shadow-[0_0_40px_rgba(56,189,248,0.18)]">
-                                            <span className="text-2xl font-black tracking-tight text-cyan-300 drop-shadow-[0_0_12px_rgba(56,189,248,0.75)]">
-                                                Spark
-                                            </span>
-                                            <svg viewBox="0 0 500 150" className="spark-lightning__svg absolute inset-0 h-full w-full" preserveAspectRatio="none">
-                                                <path d="M120 25 L140 60 L130 75 L150 110 L135 130" className="spark-lightning__bolt spark-lightning__bolt--delay0" />
-                                                <path d="M245 20 L230 55 L250 85 L235 120" className="spark-lightning__bolt spark-lightning__bolt--delay1" />
-                                                <path d="M360 35 L345 70 L365 95 L348 130" className="spark-lightning__bolt spark-lightning__bolt--delay2" />
-                                            </svg>
-                                        </div>
+                                <div className="mt-2 flex items-center gap-2">
+                                    <div className="relative inline-flex h-12 items-center justify-center rounded-3xl bg-slate-950 px-4 text-center shadow-[0_0_40px_rgba(56,189,248,0.18)]">
+                                        <span className="text-2xl font-black tracking-tight text-cyan-300 drop-shadow-[0_0_12px_rgba(56,189,248,0.75)]">
+                                            Spark
+                                        </span>
+                                        <svg viewBox="0 0 500 150" className="spark-lightning__svg absolute inset-0 h-full w-full" preserveAspectRatio="none">
+                                            <path d="M120 25 L140 60 L130 75 L150 110 L135 130" className="spark-lightning__bolt spark-lightning__bolt--delay0" />
+                                            <path d="M245 20 L230 55 L250 85 L235 120" className="spark-lightning__bolt spark-lightning__bolt--delay1" />
+                                            <path d="M360 35 L345 70 L365 95 L348 130" className="spark-lightning__bolt spark-lightning__bolt--delay2" />
+                                        </svg>
                                     </div>
+                                </div>
+                            </div>
 
                             <button
                                 onClick={toggleTheme}
@@ -112,8 +113,7 @@ function Sidebar() {
                         </button>
                     </div>
                 </div>
-            </aside>
-
+        </aside>
             <div className="flex min-h-screen flex-1 flex-col">
                 <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/80 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/80">
                     <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
