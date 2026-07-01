@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, Outlet, useNavigate } from "react-router-dom";
+import { HashRouter, Routes, Route, Navigate, Outlet, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 import "./index.css";
@@ -134,11 +134,11 @@ function AppLayout() {
 function App() {
     return (
         <ThemeProvider>
-            <BrowserRouter>
+            <HashRouter>
                 <AppDataProvider>
                     <AppInner />
                 </AppDataProvider>
-            </BrowserRouter>
+            </HashRouter>
         </ThemeProvider>
     );
 }
